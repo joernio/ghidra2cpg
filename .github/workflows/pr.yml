@@ -22,4 +22,4 @@ jobs:
             ~/.sbt
             ~/.coursier
           key: ${{ runner.os }}-sbt-${{ hashfiles('**/build.sbt') }}
-      - run: sbt scalafmtCheck +test
+      - run: sbt +test
