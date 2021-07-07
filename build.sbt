@@ -46,7 +46,7 @@ scmInfo := Some(ScmInfo(
         "scm:git@github.com:joernio/ghidra2cpg.git"))
 homepage := Some(url("https://github.com/joernio/ghidra2cpg/"))
 licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-developers := Seq(
+developers := List(
   /* sonatype requires this to be non-empty */
   Developer(
     "itsacoderepo",
