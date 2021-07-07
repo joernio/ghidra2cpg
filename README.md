@@ -2,9 +2,8 @@
 # Ghidra2cpg
 
 This is a [CPG](https://docs.joern.io/code-property-graph/) frontend based on [Ghidra](https://ghidra-sre.org/). 
-## Status
 
-![Tests](https://github.com/joernio/ghidra2cpg/workflows/SBT%20tests/badge.svg)
+[![Build Status](https://github.com/joernio/ghidra2cpg/workflows/release/badge.svg)](https://github.com/joernio/ghidra2cpg/actions?query=workflow%3Arelease)
 
 ## Setup
 
