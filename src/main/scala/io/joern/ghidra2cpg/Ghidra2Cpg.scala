@@ -67,14 +67,15 @@ class Ghidra2Cpg(
       None: Option[HeadlessGhidraProjectManager]
 
     var project: Option[Project] = None
-
-    val configuration = new HeadlessGhidraApplicationConfiguration
-    configuration.setInitializeLogging(false)
-    configuration.setApplicationLogFile(new File("/dev/null"))
-    configuration.setScriptLogFile(new File("/dev/null"))
-    configuration.setApplicationLogFile(new File("/dev/null"))
-    Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
-
+    // Initialize application (if necessary and only once)
+    if (!Application.isInitialized) {
+      val configuration = new HeadlessGhidraApplicationConfiguration
+      configuration.setInitializeLogging(false)
+      configuration.setApplicationLogFile(new File("/dev/null"))
+      configuration.setScriptLogFile(new File("/dev/null"))
+      configuration.setApplicationLogFile(new File("/dev/null"))
+      Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
+    }
     if (!new File(inputFile).isDirectory && !new File(inputFile).isFile)
       throw new InvalidInputException(
         s"$inputFile is not a valid directory or file."
@@ -208,4 +209,3 @@ class Ghidra2Cpg(
     cpg.close()
   }
 }
-
