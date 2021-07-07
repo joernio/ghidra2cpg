@@ -8,7 +8,7 @@ This is a [CPG](https://docs.joern.io/code-property-graph/) frontend based on [G
 ## Setup
 
 Requirements:
- - At least java 11 (openjdk)
+ - We recommend openjdk 11 (at least). It does not work with adoptopenjdk 16. 
  - sbt (https://www.scala-sbt.org/)
 
 ### Quickstart
