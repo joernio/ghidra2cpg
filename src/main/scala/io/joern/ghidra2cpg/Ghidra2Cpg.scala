@@ -98,7 +98,7 @@ class Ghidra2Cpg(
       case e: Throwable =>
         e.printStackTrace()
     } finally {
-      if (program != ull) {
+      if (program != null) {
         AutoAnalysisManager.getAnalysisManager(program).dispose()
         program.release(this)
         program = null
