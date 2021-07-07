@@ -55,28 +55,25 @@ class Ghidra2Cpg(
 ) {
 
   val tempWorkingDir: File = Files.createTempDirectory("ghidra2cpg").toFile
-  // tempWorkingDir.deleteOnExit() is not working,
-  // so i am doing: https://stackoverflow.com/posts/35212952/revisions
+  // tempWorkingDir.deleteOnExit() is not reliable,
+  // adding a shutdown hook seems to work https://stackoverflow.com/posts/35212952/revisions
   Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempWorkingDir)))
+
   def createCpg(): Unit = {
-    // Ghidra URL handler registration.  There's no harm in doing this more than once.
+    // We need this for the URL handler
     Handler.registerHandler()
-    // running (causing headless operation to lose focus).
-    System.setProperty("java.awt.headless", "true")
-    System.setProperty(SystemUtilities.HEADLESS_PROPERTY, "True")
+
     var projectManager: Option[HeadlessGhidraProjectManager] =
       None: Option[HeadlessGhidraProjectManager]
+
     var project: Option[Project] = None
 
-    // Initialize application (if necessary)
-    if (!Application.isInitialized) {
-      val configuration = new HeadlessGhidraApplicationConfiguration
-      configuration.setInitializeLogging(false)
-      configuration.setApplicationLogFile(new File("/dev/null"))
-      configuration.setScriptLogFile(new File("/dev/null"))
-      configuration.setApplicationLogFile(new File("/dev/null"))
-      Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
-    }
+    val configuration = new HeadlessGhidraApplicationConfiguration
+    configuration.setInitializeLogging(false)
+    configuration.setApplicationLogFile(new File("/dev/null"))
+    configuration.setScriptLogFile(new File("/dev/null"))
+    configuration.setApplicationLogFile(new File("/dev/null"))
+    Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
 
     if (!new File(inputFile).isDirectory && !new File(inputFile).isFile)
       throw new InvalidInputException(
@@ -211,3 +208,4 @@ class Ghidra2Cpg(
     cpg.close()
   }
 }
+
