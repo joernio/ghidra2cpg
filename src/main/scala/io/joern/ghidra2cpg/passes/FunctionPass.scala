@@ -113,17 +113,6 @@ class FunctionPass(
           diffGraph.addNode(node)
           diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
           diffGraph.addEdge(callNode, node, EdgeTypes.AST)
-          // for later use?
-          //instruction
-          //  .getPcode(0)
-          //  .filter(pcode =>
-          //    pcode.getOpcode == PcodeOp.INT_ADD ||
-          //      pcode.getOpcode == PcodeOp.INT_MULT ||
-          //      pcode.getOpcode == PcodeOp.INT_SUB
-          //  )
-          //  .foreach { x =>
-          //    println(s"""\t\t\t $x""")
-          //  }
         } else
           for (opObject <- opObjects) { //
             val className = opObject.getClass.getSimpleName
@@ -227,17 +216,17 @@ class FunctionPass(
         .name(local.getName)
         .code(local.toString)
         .typeFullName(Types.registerType(local.getDataType.toString))
-      diffGraph.addNode(localNode)
-      diffGraph.addEdge(blockNode, localNode, EdgeTypes.AST)
-      // TODO: add reference to local
-      val node = nodes
+      val identifier = nodes
         .NewIdentifier()
         .code(local.getName)
         .name(local.getSymbol.getName)
-        .typeFullName(Types.registerType(local.getDataType.toString))
-      diffGraph.addNode(node)
-      diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
-      diffGraph.addEdge(node, localNode, EdgeTypes.REF)
+        .typeFullName(local.getDataType.toString)
+
+      diffGraph.addNode(localNode)
+      diffGraph.addNode(identifier)
+      diffGraph.addEdge(blockNode, localNode, EdgeTypes.AST)
+      diffGraph.addEdge(blockNode, identifier, EdgeTypes.AST)
+      diffGraph.addEdge(identifier, localNode, EdgeTypes.REF)
     }
   }
 
