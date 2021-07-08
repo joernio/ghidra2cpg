@@ -90,15 +90,8 @@ class FunctionPass(
             diffGraph.addEdge(callNode, node, EdgeTypes.AST)
           }
     } else {
-
-      // check if we have more than simple operands
-      // eg: MOV RDX,qword ptr [RBP + -0x1018]
-      //      instruction.getOpObjects(0).length = 1
-      //      instruction.getOpObjects(1).length = 2
       for (index <- 0 until instruction.getNumOperands) {
         val opObjects = instruction.getOpObjects(index)
-        // TODO: check if there is a simpler way to identify the operand
-        //       for now we check if there are more than 1 operand
         if (opObjects.length > 1) {
           val argument = String.valueOf(
             instruction.getDefaultOperandRepresentation(index)
@@ -241,10 +234,7 @@ class FunctionPass(
           "RET"
         case "CALL" =>
           var mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
-          /*
-           TODO: The replace is merely for MIPS
-                 "t9=>printf" is replaced to "printf"
-           */
+          // MIPS
           mnemonicName = mnemonicName.replace("t9=>", "")
           code = mnemonicName
           mnemonicName
@@ -271,16 +261,12 @@ class FunctionPass(
     var instructions =
       currentProgram.getListing.getInstructions(addressSet, true).iterator().asScala.toList
     if (instructions.nonEmpty) {
-      // first instruction is attached to block node, with AST and CFG
       var prevInstructionNode = addCallNode(instructions.head)
       handleArguments(instructions.head, prevInstructionNode)
       diffGraph.addEdge(blockNode, prevInstructionNode, EdgeTypes.AST)
       diffGraph.addEdge(methodNode.get, prevInstructionNode, EdgeTypes.CFG)
-      // remove the first instruction and iterate over the rest
       instructions = instructions.drop(1)
       instructions.foreach { instruction =>
-        // interconnect the instructions with CFG
-        // all instructions are connected to block node by an AST edge
         val instructionNode = addCallNode(instruction)
         diffGraph.addNode(instructionNode)
         handleArguments(instruction, instructionNode)
