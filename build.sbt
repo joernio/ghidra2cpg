@@ -3,7 +3,7 @@ organization := "io.joern"
 scalaVersion := "2.13.5"
 // don't upgrade to 2.13.6 until https://github.com/com-lihaoyi/Ammonite/issues/1182 is resolved
 
-val cpgVersion = "1.3.211"
+val cpgVersion = "1.3.223"
 val protoVersion     = "0.8.525"
 val scalatestVersion = "3.1.1"
 
