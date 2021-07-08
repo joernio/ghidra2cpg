@@ -186,8 +186,7 @@ class FunctionPass(
         .asScala
         .toSeq
         .filter(_.isParameter)
-        .zipWithIndex
-        .foreach { case (parameter, index) =>
+        .foreach { case parameter =>
           var checkedParameter = ""
           if (parameter.getStorage.getRegister == null) {
             checkedParameter = parameter.getName
@@ -198,7 +197,7 @@ class FunctionPass(
             .NewMethodParameterIn()
             .code(checkedParameter)
             .name(checkedParameter)
-            .order(index + 1)
+            .order(parameter.getCategoryIndex + 1)
             .typeFullName(Types.registerType(parameter.getDataType.getName))
             .lineNumber(Some(function.getEntryPoint.getOffsetAsBigInteger.intValue()))
           diffGraph.addNode(node)
