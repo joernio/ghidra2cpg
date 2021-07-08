@@ -3,7 +3,7 @@ organization := "io.joern"
 scalaVersion := "2.13.5"
 // don't upgrade to 2.13.6 until https://github.com/com-lihaoyi/Ammonite/issues/1182 is resolved
 
-val cpgVersion = "1.3.223"
+val cpgVersion = "1.3.224"
 val scalatestVersion = "3.1.1"
 
 libraryDependencies ++= Seq(
@@ -39,7 +39,7 @@ trapExit := false
 enablePlugins(JavaAppPackaging)
 enablePlugins(GitVersioning)
 
-
+sonatypeCredentialHost := "s01.oss.sonatype.org"
 scmInfo := Some(ScmInfo(
     url("https://github.com/joernio/ghidra2cpg"),
         "scm:git@github.com:joernio/ghidra2cpg.git"))
