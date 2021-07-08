@@ -167,6 +167,7 @@ class FunctionPass(
             .name(parameter.getName)
             .order(index + 1)
             .typeFullName(Types.registerType(parameter.getDataType.getName))
+            .lineNumber(Some(parameter.getMinAddress.getOffsetAsBigInteger.intValue))
           diffGraph.addNode(node)
           diffGraph.addEdge(methodNode.get, node, EdgeTypes.AST)
         }
@@ -193,6 +194,7 @@ class FunctionPass(
             .name(checkedParameter)
             .order(index + 1)
             .typeFullName(Types.registerType(parameter.getDataType.getName))
+            .lineNumber(Some(parameter.getStorage.getMinAddress.getOffsetAsBigInteger.intValue))
           diffGraph.addNode(node)
           diffGraph.addEdge(methodNode.get, node, EdgeTypes.AST)
         }
@@ -283,18 +285,18 @@ class FunctionPass(
   def createMethodNode(): Unit = {
     methodNode = Some(
       nodes.NewMethod()
-        code function.getName
-        name function.getName
-        fullName function.getName
-        isExternal checkIfExternal(function.getName)
-        signature function.getSignature(true).toString
-        lineNumber Some(function.getEntryPoint.getOffsetAsBigInteger.intValue())
-        columnNumber Some(-1)
-        lineNumberEnd Some(function.getReturn.getMinAddress.getOffsetAsBigInteger.intValue())
-        order 0
-        filename filename
-        astParentType NodeTypes.NAMESPACE_BLOCK
-        astParentFullName s"$filename:<global>"
+        .code(function.getName)
+        .name(function.getName)
+        .fullName(function.getName)
+        .isExternal(checkIfExternal(function.getName))
+        .signature(function.getSignature(true).toString)
+        .lineNumber(Some(function.getEntryPoint.getOffsetAsBigInteger.intValue()))
+        .columnNumber(Some(-1))
+        .lineNumberEnd(Some(function.getReturn.getMinAddress.getOffsetAsBigInteger.intValue()))
+        .order(0)
+        .filename(filename)
+        .astParentType(NodeTypes.NAMESPACE_BLOCK)
+        .astParentFullName(s"$filename:<global>")
     )
 
     diffGraph.addNode(methodNode.get)
