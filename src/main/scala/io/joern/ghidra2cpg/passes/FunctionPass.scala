@@ -4,7 +4,13 @@ import ghidra.app.decompiler.DecompInterface
 import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.address.GenericAddress
 import ghidra.program.model.lang.Register
-import ghidra.program.model.listing.{CodeUnitFormat, CodeUnitFormatOptions, Function, Instruction, Program}
+import ghidra.program.model.listing.{
+  CodeUnitFormat,
+  CodeUnitFormatOptions,
+  Function,
+  Instruction,
+  Program
+}
 import ghidra.program.model.scalar.Scalar
 import ghidra.util.task.ConsoleTaskMonitor
 import io.joern.ghidra2cpg._
@@ -284,7 +290,8 @@ class FunctionPass(
 
   def createMethodNode(): Unit = {
     methodNode = Some(
-      nodes.NewMethod()
+      nodes
+        .NewMethod()
         .code(function.getName)
         .name(function.getName)
         .fullName(function.getName)
