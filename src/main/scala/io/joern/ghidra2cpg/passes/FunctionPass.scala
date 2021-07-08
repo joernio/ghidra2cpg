@@ -69,25 +69,61 @@ class FunctionPass(
     if (instruction.getMnemonicString.contains("CALL")) {
       val mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
       val callee       = functions.find(xx => xx.getName().equals(mnemonicName))
-      if (callee.nonEmpty)
-        callee.head.getParameters.zipWithIndex
-          .foreach { case (parameter, index) =>
-            var checkedParameter = ""
-            if (parameter.getRegister == null) checkedParameter = parameter.getName
-            else checkedParameter = parameter.getRegister.getName
+      if (callee.nonEmpty) {
+        // Array of tuples containing (checked parameter name, parameter index, parameter data type)
+        var checkedParameters: Array[(String, Int, String)] = Array.empty
 
-            val node = nodes
-              .NewIdentifier()
-              .code(checkedParameter)
-              .name(checkedParameter) //parameter.getName)
-              .order(index + 1)
-              .argumentIndex(index + 1)
-              .typeFullName(Types.registerType(parameter.getDataType.getName))
-              .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
-            diffGraph.addNode(node)
-            diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
-            diffGraph.addEdge(callNode, node, EdgeTypes.AST)
+        if (callee.head.isThunk) {
+          // thunk functions contain parameters already
+          val parameters = callee.head.getParameters
+
+          checkedParameters = parameters.map { parameter =>
+            val checkedParameter =
+              if (parameter.getRegister == null) parameter.getName
+              else parameter.getRegister.getName
+
+            // checked parameter name, parameter index, parameter data type
+            (checkedParameter, parameter.getOrdinal + 1, parameter.getDataType.getName)
           }
+        }
+        else {
+          // non thunk functions do not contain function parameters by default
+          // need to decompile function to get parameter information
+          // decompilation for a function is cached so subsequent calls to decompile should be free
+          val parameters = decompInterface
+            .decompileFunction(callee.head, 60, new ConsoleTaskMonitor())
+            .getHighFunction
+            .getLocalSymbolMap
+            .getSymbols
+            .asScala
+            .toSeq
+            .filter(_.isParameter)
+            .toArray
+
+          checkedParameters = parameters.map { parameter =>
+            val checkedParameter =
+              if (parameter.getStorage.getRegister == null) parameter.getName
+              else parameter.getStorage.getRegister.getName
+
+            // checked parameter name, parameter index, parameter data type
+            (checkedParameter, parameter.getCategoryIndex + 1, parameter.getDataType.getName)
+          }
+        }
+
+        checkedParameters.foreach { case (checkedParameter, index, dataType) =>
+          val node = nodes
+            .NewIdentifier()
+            .code(checkedParameter)
+            .name(checkedParameter) //parameter.getName)
+            .order(index)
+            .argumentIndex(index)
+            .typeFullName(Types.registerType(dataType))
+            .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
+          diffGraph.addNode(node)
+          diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
+          diffGraph.addEdge(callNode, node, EdgeTypes.AST)
+        }
+      }
     } else {
       for (index <- 0 until instruction.getNumOperands) {
         val opObjects = instruction.getOpObjects(index)
