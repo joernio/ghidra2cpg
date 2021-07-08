@@ -39,7 +39,7 @@ trapExit := false
 enablePlugins(JavaAppPackaging)
 enablePlugins(GitVersioning)
 
-
+sonatypeCredentialHost := "s01.oss.sonatype.org"
 scmInfo := Some(ScmInfo(
     url("https://github.com/joernio/ghidra2cpg"),
         "scm:git@github.com:joernio/ghidra2cpg.git"))
