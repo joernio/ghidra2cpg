@@ -173,7 +173,7 @@ class FunctionPass(
             .name(parameter.getName)
             .order(index + 1)
             .typeFullName(Types.registerType(parameter.getDataType.getName))
-            .lineNumber(Some(parameter.getMinAddress.getOffsetAsBigInteger.intValue))
+            .lineNumber(Some(function.getEntryPoint.getOffsetAsBigInteger.intValue()))
           diffGraph.addNode(node)
           diffGraph.addEdge(methodNode.get, node, EdgeTypes.AST)
         }
@@ -200,7 +200,7 @@ class FunctionPass(
             .name(checkedParameter)
             .order(index + 1)
             .typeFullName(Types.registerType(parameter.getDataType.getName))
-            .lineNumber(Some(parameter.getStorage.getMinAddress.getOffsetAsBigInteger.intValue))
+            .lineNumber(Some(function.getEntryPoint.getOffsetAsBigInteger.intValue()))
           diffGraph.addNode(node)
           diffGraph.addEdge(methodNode.get, node, EdgeTypes.AST)
         }
