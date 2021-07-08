@@ -1,17 +1,10 @@
 package io.joern.ghidra2cpg.passes
 
-import ghidra.app.decompiler.{DecompInterface, DecompileOptions}
+import ghidra.app.decompiler.DecompInterface
 import ghidra.program.flatapi.FlatProgramAPI
-import ghidra.program.model.address.{AddressRange, GenericAddress}
+import ghidra.program.model.address.GenericAddress
 import ghidra.program.model.lang.Register
-import ghidra.program.model.listing.{
-  CodeUnitFormat,
-  CodeUnitFormatOptions,
-  Function,
-  Instruction,
-  Program
-}
-import ghidra.program.model.pcode.HighFunction
+import ghidra.program.model.listing.{CodeUnitFormat, CodeUnitFormatOptions, Function, Instruction, Program}
 import ghidra.program.model.scalar.Scalar
 import ghidra.util.task.ConsoleTaskMonitor
 import io.joern.ghidra2cpg._
@@ -22,7 +15,6 @@ import io.shiftleft.codepropertygraph.generated.{EdgeTypes, NodeTypes, nodes}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 import io.shiftleft.proto.cpg.Cpg.DispatchTypes
 
-import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
@@ -85,6 +77,7 @@ class FunctionPass(
               .order(index + 1)
               .argumentIndex(index + 1)
               .typeFullName(Types.registerType(parameter.getDataType.getName))
+              .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
             diffGraph.addNode(node)
             diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
             diffGraph.addEdge(callNode, node, EdgeTypes.AST)
@@ -103,6 +96,7 @@ class FunctionPass(
             .order(index + 1)
             .argumentIndex(index + 1)
             .typeFullName(Types.registerType(argument))
+            .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
           diffGraph.addNode(node)
           diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
           diffGraph.addEdge(callNode, node, EdgeTypes.AST)
@@ -119,6 +113,7 @@ class FunctionPass(
                   .order(index + 1)
                   .argumentIndex(index + 1)
                   .typeFullName(Types.registerType(register.getName))
+                  .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
                 diffGraph.addNode(node)
                 diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
                 diffGraph.addEdge(callNode, node, EdgeTypes.AST)
@@ -131,6 +126,7 @@ class FunctionPass(
                   .order(index + 1)
                   .argumentIndex(index + 1)
                   .typeFullName(scalar)
+                  .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
                 diffGraph.addNode(node)
                 diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
                 diffGraph.addEdge(callNode, node, EdgeTypes.AST)
@@ -144,6 +140,7 @@ class FunctionPass(
                   .order(index + 1)
                   .argumentIndex(index + 1)
                   .typeFullName(genericAddress)
+                  .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
                 diffGraph.addNode(node)
                 diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
                 diffGraph.addEdge(callNode, node, EdgeTypes.AST)
@@ -265,8 +262,7 @@ class FunctionPass(
       handleArguments(instructions.head, prevInstructionNode)
       diffGraph.addEdge(blockNode, prevInstructionNode, EdgeTypes.AST)
       diffGraph.addEdge(methodNode.get, prevInstructionNode, EdgeTypes.CFG)
-      instructions = instructions.drop(1)
-      instructions.foreach { instruction =>
+      instructions.tail.foreach { instruction =>
         val instructionNode = addCallNode(instruction)
         diffGraph.addNode(instructionNode)
         handleArguments(instruction, instructionNode)
