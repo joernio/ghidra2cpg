@@ -227,8 +227,8 @@ class FunctionPass(
     }
   }
 
-  def sanitizeMethodName(str: String): String = {
-    str.split(">").last.replace("[", "").replace("]", "")
+  def sanitizeMethodName(methodName: String): String = {
+    methodName.split(">").lastOption.getOrElse(methodName).replace("[", "").replace("]", "")
   }
 
   def addCallNode(instruction: Instruction): NewCall = {
