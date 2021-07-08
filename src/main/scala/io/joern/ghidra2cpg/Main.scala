@@ -1,3 +1,5 @@
+package io.joern.ghidra2cpg
+
 import io.joern.ghidra2cpg.Ghidra2Cpg
 import io.shiftleft.x2cpg.{X2Cpg, X2CpgConfig}
 import scopt.OParser
