@@ -227,6 +227,10 @@ class FunctionPass(
     }
   }
 
+  def sanitizeMethodName(str: String): String = {
+    str.split(">").last.replace("[", "").replace("]", "")
+  }
+
   def addCallNode(instruction: Instruction): NewCall = {
     val node: NewCallBuilder = nodes.NewCall()
     var code: String         = ""
@@ -237,11 +241,11 @@ class FunctionPass(
           code = "RET"
           "RET"
         case "CALL" =>
-          var mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
-          // MIPS
-          mnemonicName = mnemonicName.replace("t9=>", "")
-          code = mnemonicName
-          mnemonicName
+          val operandRepresentationString = sanitizeMethodName(
+            codeUnitFormat.getOperandRepresentationString(instruction, 0)
+          )
+          code = operandRepresentationString
+          operandRepresentationString
         case "UNKNOWN" =>
           code = instruction.toString
           "UNKNOWN"
