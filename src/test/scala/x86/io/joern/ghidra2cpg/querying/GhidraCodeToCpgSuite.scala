@@ -5,6 +5,7 @@ import io.joern.ghidra2cpg.Ghidra2Cpg
 import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.cpgloading.{CpgLoader, CpgLoaderConfig}
 import io.shiftleft.semanticcpg.testfixtures.{CodeToCpgFixture, LanguageFrontend}
+import org.apache.commons.io.FileUtils
 
 import java.nio.file.Files
 import scala.sys.process._
@@ -24,16 +25,8 @@ class GhidraFrontend extends LanguageFrontend {
     val cmd = s"gcc $absPath -o $tmpBinary"
     cmd.!
 
-    // TODO: add ARM binary tests (on arch linux)
-    //val armcmd = s"aarch64-linux-gnu-gcc $absPath -o $tmpBinary"
-    //armcmd.!
-
-    // TODO: add MIPS binary tests (on arch linux, aur package)
-    //val armcmd = s"cross-mipsel-linux-gnu-gcc $absPath -o $tmpBinary"
-    //armcmd.!
-
     val tempDir = Files.createTempDirectory("ghidra2cpg").toFile
-    tempDir.deleteOnExit()
+    Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempDir)))
 
     new Ghidra2Cpg(
       tmpBinary,
