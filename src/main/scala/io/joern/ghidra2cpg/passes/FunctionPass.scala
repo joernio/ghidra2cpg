@@ -137,15 +137,18 @@ class FunctionPass(
                 diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
                 diffGraph.addEdge(callNode, node, EdgeTypes.AST)
               case "GenericAddress" =>
-                // TODO: try to resolve the address
-                val genericAddress =
-                  opObject.asInstanceOf[GenericAddress].toString()
+                val genericAddress = opObject.asInstanceOf[GenericAddress]
+                val symbolItr = currentProgram.getSymbolTable.getSymbolIterator(genericAddress, true)
+                val symbolName =
+                  if (symbolItr.hasNext) symbolItr.next.toString()
+                  else genericAddress.toString()
+
                 val node = nodes
                   .NewLiteral()
-                  .code(genericAddress)
+                  .code(genericAddress.toString())
                   .order(index + 1)
                   .argumentIndex(index + 1)
-                  .typeFullName(genericAddress)
+                  .typeFullName(symbolName)
                   .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
                 diffGraph.addNode(node)
                 diffGraph.addEdge(callNode, node, EdgeTypes.ARGUMENT)
