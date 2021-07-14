@@ -4,16 +4,10 @@ import io.shiftleft.semanticcpg.language._
 
 class RefNodeTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | int main() {
-      |   int x = 10;
-      |   int y = 10;
-      |}
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain exactly one local with one referencing identifier " in {
-    cpg.method.name("main").local.referencingIdentifiers.l match {
+    cpg.method.name("refNodeTests").local.referencingIdentifiers.l match {
       case List(x, y) =>
         x.code shouldBe "local_c"
         y.code shouldBe "local_10"

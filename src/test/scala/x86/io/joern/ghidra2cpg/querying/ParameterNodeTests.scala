@@ -4,11 +4,8 @@ import io.shiftleft.semanticcpg.language._
 
 class ParameterNodeTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | #include <stdio.h>
-      | int main(int argc, char**argv) {printf("hello world");}
-      |""".stripMargin
+  override val code: String = ""
+
   "should contain atLeast one nodes with all mandatory fields set" in {
     cpg.method.name("printf").parameter.name.l.sorted.distinct match {
       case List(x) =>

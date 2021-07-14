@@ -4,12 +4,7 @@ import io.shiftleft.semanticcpg.language._
 
 class ReturnNodeTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | int main() {
-      |   int x = 10;
-      |}
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain exactly one node with all mandatory fields set" in {
     cpg.method.name("main").methodReturn.l match {

@@ -4,15 +4,11 @@ import io.shiftleft.semanticcpg.language._
 
 class CFGTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | #include <stdio.h>
-      | int main(int argc, char**argv) {printf("hello world");}
-      |""".stripMargin
+  override val code: String = ""
 
   "should have the cfgFirst node with the value set in" in {
     val cfgFirst = cpg.method.name("main").cfgFirst.l.head
-    cfgFirst.code shouldBe "ENDBR64"
+    cfgFirst.code shouldBe "PUSH RBP"
     cfgFirst.order shouldBe 0
   }
 }
