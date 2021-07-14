@@ -11,7 +11,6 @@ import ghidra.framework.{Application, HeadlessGhidraApplicationConfiguration}
 import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.listing.Program
 import ghidra.program.util.GhidraProgramUtilities
-import ghidra.util.SystemUtilities
 import ghidra.util.exception.InvalidInputException
 import ghidra.util.task.TaskMonitor
 import io.joern.ghidra2cpg.passes.{FunctionPass, MetaDataPass, NamespacePass, TypesPass}
@@ -71,11 +70,9 @@ class Ghidra2Cpg(
     if (!Application.isInitialized) {
       val configuration = new HeadlessGhidraApplicationConfiguration
       configuration.setInitializeLogging(false)
-      configuration.setApplicationLogFile(new File("/dev/null"))
-      configuration.setScriptLogFile(new File("/dev/null"))
-      configuration.setApplicationLogFile(new File("/dev/null"))
       Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
     }
+
     if (!new File(inputFile).isDirectory && !new File(inputFile).isFile)
       throw new InvalidInputException(
         s"$inputFile is not a valid directory or file."
@@ -133,13 +130,6 @@ class Ghidra2Cpg(
         e.printStackTrace()
     }
   }
-
-  private class HeadlessProjectConnection(
-      projectManager: HeadlessGhidraProjectManager,
-      connection: GhidraURLConnection
-  ) extends DefaultProject(projectManager, connection) {}
-
-  private class HeadlessGhidraProjectManager extends DefaultProjectManager {}
 
   def handleProgram(currentProgram: Program, fileAbsolutePath: String): Unit = {
 
@@ -208,4 +198,11 @@ class Ghidra2Cpg(
     new ReachingDefPass(cpg).createAndApply()
     cpg.close()
   }
+
+  private class HeadlessProjectConnection(
+      projectManager: HeadlessGhidraProjectManager,
+      connection: GhidraURLConnection
+  ) extends DefaultProject(projectManager, connection) {}
+
+  private class HeadlessGhidraProjectManager extends DefaultProjectManager {}
 }

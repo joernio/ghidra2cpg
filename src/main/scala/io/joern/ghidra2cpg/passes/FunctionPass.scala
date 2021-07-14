@@ -85,8 +85,7 @@ class FunctionPass(
             // checked parameter name, parameter index, parameter data type
             (checkedParameter, parameter.getOrdinal + 1, parameter.getDataType.getName)
           }
-        }
-        else {
+        } else {
           // non thunk functions do not contain function parameters by default
           // need to decompile function to get parameter information
           // decompilation for a function is cached so subsequent calls to decompile should be free
