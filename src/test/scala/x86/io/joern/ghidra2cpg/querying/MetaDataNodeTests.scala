@@ -4,10 +4,7 @@ import io.shiftleft.semanticcpg.language._
 
 class MetaDataNodeTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | int main() {}
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain exactly one node with all mandatory fields set" in {
     cpg.metaData.l match {

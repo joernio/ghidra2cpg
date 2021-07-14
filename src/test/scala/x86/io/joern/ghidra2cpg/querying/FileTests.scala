@@ -5,12 +5,7 @@ import io.shiftleft.semanticcpg.language.types.structure.FileTraversal
 
 class FileTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | int main() {}
-      | int foo() {}
-      | struct my_struct { int x; };
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain two file nodes in total, both with order=0" in {
     cpg.file.order.l shouldBe List(0, 0)
@@ -37,23 +32,31 @@ class FileTests extends GhidraCodeToCpgSuite {
 
   "should allow traversing from file to its methods via namespace block" in {
     cpg.file.nameNot(FileTraversal.UNKNOWN).method.name.toSet shouldBe Set(
+      "__cxa_finalize",
+      "_fini",
+      "main",
+      "level1",
+      "deregister_tm_clones",
+      "_start",
+      "__gmon_start__",
+      "level2",
+      "__libc_start_main",
       "FUN_00101020",
       "_ITM_deregisterTMCloneTable",
-      "_ITM_registerTMCloneTable",
-      "__cxa_finalize",
-      "__do_global_dtors_aux",
-      "__gmon_start__",
-      "__libc_csu_fini",
-      "__libc_csu_init",
-      "__libc_start_main",
-      "_fini",
+      "level3",
       "_init",
-      "_start",
-      "deregister_tm_clones",
-      "foo",
+      "literalNodeTest",
+      "__do_global_dtors_aux",
+      "__stack_chk_fail",
+      "register_tm_clones",
       "frame_dummy",
-      "main",
-      "register_tm_clones"
+      "_ITM_registerTMCloneTable",
+      "printf",
+      "dataflow",
+      "refNodeTests",
+      "localNodeTests",
+      "__libc_csu_init",
+      "__libc_csu_fini"
     )
   }
 

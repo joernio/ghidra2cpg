@@ -1,7 +1,5 @@
 package x86.io.joern.ghidra2cpg.querying
 
-import io.shiftleft.dataflowengineoss.layers.dataflows.{OssDataFlow, OssDataFlowOptions}
-import io.shiftleft.semanticcpg.layers.LayerCreatorContext
 import io.shiftleft.codepropertygraph.generated.nodes
 import io.shiftleft.dataflowengineoss.language._
 import io.shiftleft.dataflowengineoss.queryengine.EngineContext
@@ -9,19 +7,7 @@ import io.shiftleft.dataflowengineoss.semanticsloader.{Parser, Semantics}
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
 
 class DataFlowTests extends GhidraCodeToCpgSuite {
-  override val code: String =
-    """
-      | #include <stdio.h>
-      | int dataflow1() {
-      |  asm ("add $1, %eax\n\t"
-      |    "mov %eax, %edx\n\t"
-      |    "mov %edx, %ecx\n\t"
-      |    "mov %ecx, %eax");
-      | }
-      |
-      | int main() {
-      | }
-      |""".stripMargin
+  override val code: String = ""
 
   def flowToResultPairs(path: Path): List[String] = {
     val pairs = path.elements.map {
@@ -44,9 +30,9 @@ class DataFlowTests extends GhidraCodeToCpgSuite {
     val semantics: Semantics             = Semantics.fromList(new Parser().parseFile(semanticsFilename))
     implicit var context: EngineContext  = EngineContext(semantics)
 
-    def source = cpg.method.name("dataflow1").call.argument.code("1")
+    def source = cpg.method.name("dataflow").call.argument.code("1")
     def sink = cpg.method
-      .name("dataflow1")
+      .name("dataflow")
       .call
       .where(_.argument.order(2).code("ECX"))
       .argument

@@ -4,17 +4,10 @@ import io.shiftleft.semanticcpg.language._
 
 class LiteralNodeTests extends GhidraCodeToCpgSuite {
 
-  override val code: String =
-    """
-      | int main() {
-      |   int x;
-      |   char y[] = "TEST";
-      |   x = 100;
-      |}
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain exactly one literal node containing \"TEST\" with all mandatory fields set" in {
-    cpg.method.name("main").literal.code("TEST").l match {
+    cpg.method.name("literalNodeTest").literal.code("TEST").l match {
       case List(x) =>
         x.code shouldBe "TEST"
       case _ => fail()

@@ -3,20 +3,12 @@ package x86.io.joern.ghidra2cpg.querying
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
 
 class CallNodeTests extends GhidraCodeToCpgSuite {
-  override val code: String =
-    """
-      | int level3() { return 1; }
-      | int level2() { return level3(); }
-      | int level1() { return level2(); }
-      | int main() {
-      |   int x = 10;
-      |   return level1();
-      |}
-      |""".stripMargin
+  override val code: String = ""
 
   "A call should contain exactly one node with all mandatory fields set" in {
     cpg.call
       .name("<operator>.assignment")
+      .where(_.method.name("main"))
       .where(
         _.argument
           .order(2)
@@ -51,8 +43,9 @@ class CallNodeTests extends GhidraCodeToCpgSuite {
       .name("<operator>.assignment")
       .where(_.argument.order(2).code("a"))
       .method
-      .l match {
-      case List(x) =>
+      .l
+      .last match {
+      case x =>
         x.name shouldBe "main"
       case _ => fail()
     }

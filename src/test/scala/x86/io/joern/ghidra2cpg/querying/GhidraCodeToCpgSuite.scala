@@ -1,35 +1,27 @@
 package x86.io.joern.ghidra2cpg.querying
 
-import better.files._
 import io.joern.ghidra2cpg.Ghidra2Cpg
 import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.cpgloading.{CpgLoader, CpgLoaderConfig}
 import io.shiftleft.semanticcpg.testfixtures.{CodeToCpgFixture, LanguageFrontend}
 import org.apache.commons.io.FileUtils
 
-import java.nio.file.Files
-import scala.sys.process._
+import java.nio.file.{Files, Paths}
 
 class GhidraFrontend extends LanguageFrontend {
-  override val fileSuffix: String = ".c"
+  override val fileSuffix: String = ""
 
   override def execute(sourceCodeFile: java.io.File): Cpg = {
-    val dir = File.newTemporaryDirectory("ghidra2cpg-tests")
-    dir.deleteOnExit()
-
-    val f         = sourceCodeFile.listFiles.head
-    val absPath   = f.getAbsolutePath
-    val tmpBinary = (dir / "binary").toJava.getAbsolutePath
-    val cpgBin    = (dir / "cpg.bin").toJava.getAbsolutePath
-
-    val cmd = s"gcc $absPath -o $tmpBinary"
-    cmd.!
+    val dir = Files.createTempDirectory("ghidra2cpg-tests").toFile
+    Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(dir)))
 
     val tempDir = Files.createTempDirectory("ghidra2cpg").toFile
     Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempDir)))
 
+    val cpgBin    = dir.getAbsolutePath
+    val inputFile = s"${Paths.get(".").toAbsolutePath}/src/test/testbinaries/x86_64.bin"
     new Ghidra2Cpg(
-      tmpBinary,
+      inputFile,
       Some(cpgBin)
     ).createCpg()
 

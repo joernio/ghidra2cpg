@@ -1,7 +1,7 @@
 package x86.io.joern.ghidra2cpg.querying
 
-import io.shiftleft.semanticcpg.language.types.structure.FileTraversal
 import io.shiftleft.semanticcpg.language._
+import io.shiftleft.semanticcpg.language.types.structure.FileTraversal
 
 class NamespaceBlockTests extends GhidraCodeToCpgSuite {
 
@@ -9,12 +9,7 @@ class NamespaceBlockTests extends GhidraCodeToCpgSuite {
   // that can't be associated in a file into the namespace "<global>", and
   // those which can in `filename:<global>`
 
-  override val code: String =
-    """
-      |int main() {}
-      |int foo() {}
-      |struct my_struct{};
-      |""".stripMargin
+  override val code: String = ""
 
   "should contain two namespace blocks in total" in {
     cpg.namespaceBlock.size shouldBe 2
@@ -39,21 +34,29 @@ class NamespaceBlockTests extends GhidraCodeToCpgSuite {
     cpg.namespaceBlock.filenameNot(FileTraversal.UNKNOWN).method.name.l shouldBe List(
       "_init",
       "FUN_00101020",
-      "__cxa_finalize",
+      "__stack_chk_fail",
+      "printf",
       "_start",
       "deregister_tm_clones",
       "register_tm_clones",
       "__do_global_dtors_aux",
       "frame_dummy",
+      "refNodeTests",
+      "dataflow",
+      "level3",
+      "level2",
+      "level1",
+      "literalNodeTest",
+      "localNodeTests",
       "main",
-      "foo",
       "__libc_csu_init",
       "__libc_csu_fini",
       "_fini",
       "_ITM_deregisterTMCloneTable",
       "__libc_start_main",
       "__gmon_start__",
-      "_ITM_registerTMCloneTable"
+      "_ITM_registerTMCloneTable",
+      "__cxa_finalize"
     )
   }
 
