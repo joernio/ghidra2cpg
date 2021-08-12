@@ -1,9 +1,14 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
 
-class CallNodeTests extends GhidraCodeToCpgSuite {
-  override val code: String = ""
+class CallNodeTests extends GhidraBinToCpgSuite {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   "A call should contain exactly one node with all mandatory fields set" in {
     cpg.call

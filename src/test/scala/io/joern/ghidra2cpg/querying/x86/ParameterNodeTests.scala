@@ -1,10 +1,14 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.semanticcpg.language._
 
-class ParameterNodeTests extends GhidraCodeToCpgSuite {
+class ParameterNodeTests extends GhidraBinToCpgSuite {
 
-  override val code: String = ""
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   "should contain atLeast one nodes with all mandatory fields set" in {
     cpg.method.name("printf").parameter.name.l.sorted.distinct match {

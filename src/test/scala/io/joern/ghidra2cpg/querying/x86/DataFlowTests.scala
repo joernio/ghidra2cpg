@@ -1,13 +1,18 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.codepropertygraph.generated.nodes
 import io.shiftleft.dataflowengineoss.language._
 import io.shiftleft.dataflowengineoss.queryengine.EngineContext
 import io.shiftleft.dataflowengineoss.semanticsloader.{Parser, Semantics}
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
 
-class DataFlowTests extends GhidraCodeToCpgSuite {
-  override val code: String = ""
+class DataFlowTests extends GhidraBinToCpgSuite {
+
+  override def beforeAll: Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   def flowToResultPairs(path: Path): List[String] = {
     val pairs = path.elements.map {

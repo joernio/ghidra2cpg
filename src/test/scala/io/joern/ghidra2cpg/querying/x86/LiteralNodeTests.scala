@@ -1,10 +1,14 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.semanticcpg.language._
 
-class LiteralNodeTests extends GhidraCodeToCpgSuite {
+class LiteralNodeTests extends GhidraBinToCpgSuite {
 
-  override val code: String = ""
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   "should contain exactly one literal node containing \"TEST\" with all mandatory fields set" in {
     cpg.method.name("literalNodeTest").literal.code("TEST").l match {

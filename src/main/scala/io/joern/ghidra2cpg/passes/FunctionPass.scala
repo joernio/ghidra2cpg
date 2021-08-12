@@ -61,6 +61,13 @@ class FunctionPass(
 
   override def partIterator: Iterator[String] = List("").iterator
 
+  implicit def intToIntegerOption(intOption: Option[Int]): Option[Integer] = {
+    intOption.map(intValue => {
+      val integerValue: Integer = intValue
+      integerValue
+    })
+  }
+
   // Iterating over operands and add edges to call
   def handleArguments(
       instruction: Instruction,

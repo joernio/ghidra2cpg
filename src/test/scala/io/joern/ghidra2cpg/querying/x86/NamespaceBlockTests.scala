@@ -1,15 +1,19 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.semanticcpg.language._
 import io.shiftleft.semanticcpg.language.types.structure.FileTraversal
 
-class NamespaceBlockTests extends GhidraCodeToCpgSuite {
+class NamespaceBlockTests extends GhidraBinToCpgSuite {
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   // The fuzzyC parser currently just ignores namespaces. We place symbols
   // that can't be associated in a file into the namespace "<global>", and
   // those which can in `filename:<global>`
-
-  override val code: String = ""
 
   "should contain two namespace blocks in total" in {
     cpg.namespaceBlock.size shouldBe 2

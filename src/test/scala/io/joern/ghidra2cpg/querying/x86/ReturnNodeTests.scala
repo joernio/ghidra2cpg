@@ -1,10 +1,14 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.querying.x86
 
+import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.semanticcpg.language._
 
-class ReturnNodeTests extends GhidraCodeToCpgSuite {
+class ReturnNodeTests extends GhidraBinToCpgSuite {
 
-  override val code: String = ""
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    buildCpgForBin("x86_64.bin")
+  }
 
   "should contain exactly one node with all mandatory fields set" in {
     cpg.method.name("main").methodReturn.l match {

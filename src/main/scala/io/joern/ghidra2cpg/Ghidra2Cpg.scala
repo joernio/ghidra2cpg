@@ -19,10 +19,7 @@ import io.shiftleft.dataflowengineoss.passes.reachingdef.ReachingDefPass
 import io.shiftleft.passes.KeyPoolCreator
 import io.shiftleft.semanticcpg.passes.FileCreationPass
 import io.shiftleft.semanticcpg.passes.containsedges.ContainsEdgePass
-import io.shiftleft.semanticcpg.passes.languagespecific.fuzzyc.{
-  MethodStubCreator,
-  TypeDeclStubCreator
-}
+import io.shiftleft.semanticcpg.passes.languagespecific.fuzzyc.MethodStubCreator
 import io.shiftleft.semanticcpg.passes.linking.calllinker.StaticCallLinker
 import io.shiftleft.semanticcpg.passes.linking.linker.Linker
 import io.shiftleft.semanticcpg.passes.linking.memberaccesslinker.MemberAccessLinker
@@ -49,7 +46,7 @@ object Types {
   }
 }
 class Ghidra2Cpg(
-    inputFile: String,
+    inputFile: File,
     outputFile: Option[String]
 ) {
 
@@ -73,7 +70,7 @@ class Ghidra2Cpg(
       Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
     }
 
-    if (!new File(inputFile).isDirectory && !new File(inputFile).isFile)
+    if (!inputFile.isDirectory && !inputFile.isFile)
       throw new InvalidInputException(
         s"$inputFile is not a valid directory or file."
       )
@@ -84,14 +81,14 @@ class Ghidra2Cpg(
       projectManager = Some(new HeadlessGhidraProjectManager)
       project = Some(projectManager.get.createProject(locator, null, false))
       program = AutoImporter.importByUsingBestGuess(
-        new File(inputFile),
+        inputFile,
         null,
         this,
         new MessageLog,
         TaskMonitor.DUMMY
       )
 
-      analyzeProgram(Paths.get(inputFile).toFile.getAbsolutePath, program)
+      analyzeProgram(inputFile.getAbsolutePath, program)
     } catch {
       case e: Throwable =>
         e.printStackTrace()
@@ -185,7 +182,6 @@ class Ghidra2Cpg(
     }
 
     new TypesPass(cpg).createAndApply()
-    new TypeDeclStubCreator(cpg).createAndApply()
     new MethodStubCreator(cpg).createAndApply()
     new MethodDecoratorPass(cpg).createAndApply()
     new Linker(cpg).createAndApply()

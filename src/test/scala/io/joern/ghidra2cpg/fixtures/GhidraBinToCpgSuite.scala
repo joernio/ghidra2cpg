@@ -1,17 +1,18 @@
-package x86.io.joern.ghidra2cpg.querying
+package io.joern.ghidra2cpg.fixtures
 
 import io.joern.ghidra2cpg.Ghidra2Cpg
 import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.cpgloading.{CpgLoader, CpgLoaderConfig}
-import io.shiftleft.semanticcpg.testfixtures.{CodeToCpgFixture, LanguageFrontend}
+import io.shiftleft.semanticcpg.testfixtures.{BinToCpgFixture, LanguageFrontend}
+import io.shiftleft.utils.ProjectRoot
 import org.apache.commons.io.FileUtils
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 
 class GhidraFrontend extends LanguageFrontend {
   override val fileSuffix: String = ""
 
-  override def execute(sourceCodeFile: java.io.File): Cpg = {
+  override def execute(inputFile: java.io.File): Cpg = {
     val dir = Files.createTempDirectory("ghidra2cpg-tests").toFile
     Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(dir)))
 
@@ -19,7 +20,6 @@ class GhidraFrontend extends LanguageFrontend {
     Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempDir)))
 
     val cpgBin    = dir.getAbsolutePath
-    val inputFile = s"${Paths.get(".").toAbsolutePath}/src/test/testbinaries/x86_64.bin"
     new Ghidra2Cpg(
       inputFile,
       Some(cpgBin)
@@ -32,4 +32,6 @@ class GhidraFrontend extends LanguageFrontend {
 
 }
 
-class GhidraCodeToCpgSuite extends CodeToCpgFixture(new GhidraFrontend) {}
+class GhidraBinToCpgSuite extends BinToCpgFixture(new GhidraFrontend) {
+  override val binDirectory  = ProjectRoot.relativise("src/test/testbinaries/")
+}
