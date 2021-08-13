@@ -33,5 +33,5 @@ class GhidraFrontend extends LanguageFrontend {
 }
 
 class GhidraBinToCpgSuite extends BinToCpgFixture(new GhidraFrontend) {
-  override val binDirectory  = ProjectRoot.relativise("src/test/testbinaries/")
+  override val binDirectory  = ProjectRoot.relativise("ghidra2cpg-tests/src/test/testbinaries/")
 }

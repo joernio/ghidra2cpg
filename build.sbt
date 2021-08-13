@@ -1,24 +1,11 @@
 name := "ghidra2cpg"
-organization := "io.joern"
-scalaVersion := "2.13.5"
+ThisBuild/organization := "io.joern"
+ThisBuild/scalaVersion := "2.13.5"
 // don't upgrade to 2.13.6 until https://github.com/com-lihaoyi/Ammonite/issues/1182 is resolved
 
 val cpgVersion = "1.3.272"
-val scalatestVersion = "3.1.1"
 
-libraryDependencies ++= Seq(
-  "com.github.scopt" %% "scopt"                    % "3.7.1",
-  "commons-io"        % "commons-io"               % "2.7",
-  "io.shiftleft"      % "ghidra"                   % "10.0_PUBLIC_20210621",
-  "io.shiftleft"     %% "codepropertygraph"        % cpgVersion,
-  "io.shiftleft"     %% "codepropertygraph-protos" % cpgVersion,
-  "io.shiftleft"     %% "dataflowengineoss"        % cpgVersion,
-  "io.shiftleft"     %% "semanticcpg"              % cpgVersion,
-  "io.shiftleft"     %% "semanticcpg-tests"        % cpgVersion       % Test classifier "tests",
-  "org.scalatest"    %% "scalatest"                % scalatestVersion % Test
-)
-
-resolvers ++= Seq(
+ThisBuild / resolvers ++= Seq(
   Resolver.mavenLocal,
   Resolver.mavenCentral,
   Resolver.jcenterRepo,
@@ -30,14 +17,9 @@ scalacOptions ++= Seq(
   "-deprecation" // Emit warning and location for usages of deprecated APIs.
 )
 
-fork := true
-javaOptions := Seq("-Djava.protocol.handler.pkgs=ghidra.framework.protocol")
 
-resolvers += Resolver.mavenLocal
+ThisBuild / resolvers += Resolver.mavenLocal
 trapExit := false
-
-enablePlugins(JavaAppPackaging)
-enablePlugins(GitVersioning)
 
 sonatypeCredentialHost := "s01.oss.sonatype.org"
 scmInfo := Some(ScmInfo(
@@ -60,6 +42,9 @@ developers := List(
     url("https://github.com/fabsx00")
   )
 )
-publishTo := sonatypePublishToBundle.value
+ThisBuild/publishTo := sonatypePublishToBundle.value
+
+lazy val ghidra2cpg = Projects.ghidra2cpg
+lazy val ghidra2cpgtests = Projects.ghidra2cpgtests.dependsOn(ghidra2cpg)
 
 Global / onChangedBuildSource := ReloadOnSourceChanges

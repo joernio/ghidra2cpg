@@ -50,7 +50,7 @@ class Ghidra2Cpg(
     outputFile: Option[String]
 ) {
 
-  val tempWorkingDir: File = Files.createTempDirectory("ghidra2cpg").toFile
+  val tempWorkingDir: File = Files.createTempDirectory("ghidra2cpg_tmp").toFile
   // tempWorkingDir.deleteOnExit() is not reliable,
   // adding a shutdown hook seems to work https://stackoverflow.com/posts/35212952/revisions
   Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempWorkingDir)))
