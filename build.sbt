@@ -21,7 +21,7 @@ scalacOptions ++= Seq(
 ThisBuild / resolvers += Resolver.mavenLocal
 trapExit := false
 
-ThisBuild/sonatypeCredentialHost := "s01.oss.sonatype.org"
+sonatypeCredentialHost := "s01.oss.sonatype.org"
 ThisBuild/scmInfo := Some(ScmInfo(
     url("https://github.com/joernio/ghidra2cpg"),
         "scm:git@github.com:joernio/ghidra2cpg.git"))
