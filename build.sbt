@@ -21,13 +21,13 @@ scalacOptions ++= Seq(
 ThisBuild / resolvers += Resolver.mavenLocal
 trapExit := false
 
-sonatypeCredentialHost := "s01.oss.sonatype.org"
-scmInfo := Some(ScmInfo(
+ThisBuild/sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild/scmInfo := Some(ScmInfo(
     url("https://github.com/joernio/ghidra2cpg"),
         "scm:git@github.com:joernio/ghidra2cpg.git"))
-homepage := Some(url("https://github.com/joernio/ghidra2cpg/"))
-licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
-developers := List(
+ThisBuild/homepage := Some(url("https://github.com/joernio/ghidra2cpg/"))
+ThisBuild/licenses := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild/developers := List(
   /* sonatype requires this to be non-empty */
   Developer(
     "itsacoderepo",
