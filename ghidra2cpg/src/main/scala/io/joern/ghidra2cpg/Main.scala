@@ -22,7 +22,7 @@ object Main extends App {
   private val frontendSpecificOptions = {
     val builder = OParser.builder[Config]
     import builder.programName
-    OParser.sequence(programName("javasrc2cpg"))
+    OParser.sequence(programName("ghidra2cpg"))
   }
 
   X2Cpg.parseCommandLine(args, frontendSpecificOptions, Config()) match {
