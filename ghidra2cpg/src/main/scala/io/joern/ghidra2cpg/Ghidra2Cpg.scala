@@ -14,7 +14,7 @@ import ghidra.program.util.GhidraProgramUtilities
 import ghidra.util.exception.InvalidInputException
 import ghidra.util.task.TaskMonitor
 import io.joern.ghidra2cpg.passes.{FunctionPass, MetaDataPass, NamespacePass, TypesPass}
-import io.joern.ghidra2cpg.processors.X86
+import io.joern.ghidra2cpg.processors._
 import io.shiftleft.dataflowengineoss.passes.reachingdef.ReachingDefPass
 import io.shiftleft.passes.KeyPoolCreator
 import io.shiftleft.semanticcpg.passes.FileCreationPass
@@ -165,7 +165,10 @@ class Ghidra2Cpg(
 
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
       case _ => new X86
+      case "MIPS" => new Mips
+      case _      => new X86
     }
+    
     functions.distinctBy(_.getName).foreach { function =>
       new FunctionPass(
         processor,
