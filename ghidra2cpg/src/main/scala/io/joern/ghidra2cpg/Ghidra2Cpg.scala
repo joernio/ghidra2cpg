@@ -13,16 +13,13 @@ import ghidra.program.model.listing.Program
 import ghidra.program.util.GhidraProgramUtilities
 import ghidra.util.exception.InvalidInputException
 import ghidra.util.task.TaskMonitor
-import io.joern.ghidra2cpg.passes._
-import io.joern.ghidra2cpg.processors._
+import io.joern.ghidra2cpg.passes.{FunctionPass, MetaDataPass, NamespacePass, TypesPass}
+import io.joern.ghidra2cpg.processors.X86
 import io.shiftleft.dataflowengineoss.passes.reachingdef.ReachingDefPass
 import io.shiftleft.passes.KeyPoolCreator
 import io.shiftleft.semanticcpg.passes.FileCreationPass
 import io.shiftleft.semanticcpg.passes.containsedges.ContainsEdgePass
-import io.shiftleft.semanticcpg.passes.languagespecific.fuzzyc.{
-  MethodStubCreator,
-  TypeDeclStubCreator
-}
+import io.shiftleft.semanticcpg.passes.languagespecific.fuzzyc.MethodStubCreator
 import io.shiftleft.semanticcpg.passes.linking.calllinker.StaticCallLinker
 import io.shiftleft.semanticcpg.passes.linking.linker.Linker
 import io.shiftleft.semanticcpg.passes.linking.memberaccesslinker.MemberAccessLinker
@@ -49,11 +46,11 @@ object Types {
   }
 }
 class Ghidra2Cpg(
-    inputFile: String,
+    inputFile: File,
     outputFile: Option[String]
 ) {
 
-  val tempWorkingDir: File = Files.createTempDirectory("ghidra2cpg").toFile
+  val tempWorkingDir: File = Files.createTempDirectory("ghidra2cpg_tmp").toFile
   // tempWorkingDir.deleteOnExit() is not reliable,
   // adding a shutdown hook seems to work https://stackoverflow.com/posts/35212952/revisions
   Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempWorkingDir)))
@@ -73,7 +70,7 @@ class Ghidra2Cpg(
       Application.initializeApplication(new GhidraJarApplicationLayout, configuration)
     }
 
-    if (!new File(inputFile).isDirectory && !new File(inputFile).isFile)
+    if (!inputFile.isDirectory && !inputFile.isFile)
       throw new InvalidInputException(
         s"$inputFile is not a valid directory or file."
       )
@@ -84,14 +81,14 @@ class Ghidra2Cpg(
       projectManager = Some(new HeadlessGhidraProjectManager)
       project = Some(projectManager.get.createProject(locator, null, false))
       program = AutoImporter.importByUsingBestGuess(
-        new File(inputFile),
+        inputFile,
         null,
         this,
         new MessageLog,
         TaskMonitor.DUMMY
       )
 
-      analyzeProgram(Paths.get(inputFile).toFile.getAbsolutePath, program)
+      analyzeProgram(inputFile.getAbsolutePath, program)
     } catch {
       case e: Throwable =>
         e.printStackTrace()
@@ -163,14 +160,15 @@ class Ghidra2Cpg(
     // Actual CPG construction
     val cpg = X2Cpg.newEmptyCpg(outputFile)
 
-    new MetaDataPass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
+    new MetaDataPass(fileAbsolutePath, cpg, keyPools.next()).createAndApply()
     new NamespacePass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
-
+    
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
+      case _ => new X86
       case "MIPS" => new Mips
       case _      => new X86
     }
-
+    
     functions.distinctBy(_.getName).foreach { function =>
       new FunctionPass(
         processor,
@@ -186,17 +184,7 @@ class Ghidra2Cpg(
         .createAndApply()
     }
 
-    val addresses =
-      functions.distinctBy(_.getName).map { function => function.getBody.getMinAddress }
-    new LiteralsPass(cpg, currentProgram, flatProgramAPI, addresses).createAndApply()
-    //functions.distinctBy(_.getName).foreach { function =>
-    //  new LiteralsPass(cpg, currentProgram, flatProgramAPI, function).createAndApply()
-    //}
-    println(
-      s"""${cpg.graph.nodes("<global>").asScala.toList.size}"""
-    ) //.headOption.getOrElse("NONE")}""")//label()}""")
     new TypesPass(cpg).createAndApply()
-    new TypeDeclStubCreator(cpg).createAndApply()
     new MethodStubCreator(cpg).createAndApply()
     new MethodDecoratorPass(cpg).createAndApply()
     new Linker(cpg).createAndApply()
