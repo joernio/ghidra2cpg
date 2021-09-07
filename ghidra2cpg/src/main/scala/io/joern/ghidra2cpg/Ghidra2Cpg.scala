@@ -164,7 +164,6 @@ class Ghidra2Cpg(
     new NamespacePass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
 
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
-      case _ => new X86
       case "MIPS" => new Mips
       case _      => new X86
     }
