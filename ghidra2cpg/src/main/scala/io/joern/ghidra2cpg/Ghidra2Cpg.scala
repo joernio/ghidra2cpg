@@ -165,7 +165,7 @@ class Ghidra2Cpg(
 
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
       case "MIPS"    => new Mips
-      case "aarch64" => new Arm
+      case "AARCH64" => new Arm
       case _         => new X86
     }
  
