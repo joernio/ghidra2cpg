@@ -164,10 +164,11 @@ class Ghidra2Cpg(
     new NamespacePass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
 
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
-      case "MIPS" => new Mips
-      case _      => new X86
+      case "MIPS"    => new Mips
+      case "AARCH64" => new Arm
+      case _         => new X86
     }
-    
+ 
     functions.distinctBy(_.getName).foreach { function =>
       new FunctionPass(
         processor,
