@@ -35,4 +35,3 @@ class Mips extends Processor {
       "sw"     -> "<operator>.assignment"
     )
 }
-

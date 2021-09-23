@@ -1,7 +1,7 @@
 package io.joern.ghidra2cpg.passes
 
 import io.shiftleft.codepropertygraph.Cpg
-import io.shiftleft.codepropertygraph.generated.nodes
+import io.shiftleft.codepropertygraph.generated.{Languages, nodes}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 
 class MetaDataPass(filename: String, cpg: Cpg, keyPool: IntervalKeyPool)
@@ -26,7 +26,7 @@ class MetaDataPass(filename: String, cpg: Cpg, keyPool: IntervalKeyPool)
     diffGraph.addNode(
       nodes
         .NewMetaData()
-        .language("Ghidra")
+        .language(Languages.GHIDRA)
         .version("0.1")
     )
 

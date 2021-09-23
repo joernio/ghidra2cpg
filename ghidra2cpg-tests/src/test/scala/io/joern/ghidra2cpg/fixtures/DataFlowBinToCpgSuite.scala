@@ -17,8 +17,9 @@ import scala.util.Try
 
 class DataFlowBinToCpgSuite extends GhidraBinToCpgSuite {
 
-  var semanticsFilename = ProjectRoot.relativise("dataflowengineoss/src/test/resources/default.semantics")
-  var semantics: Semantics = _
+  var semanticsFilename =
+    ProjectRoot.relativise("dataflowengineoss/src/test/resources/default.semantics")
+  var semantics: Semantics            = _
   implicit var context: EngineContext = _
 
   override def beforeAll(): Unit = {
@@ -49,18 +50,24 @@ class DataFlowBinToCpgSuite extends GhidraBinToCpgSuite {
   protected def getMethodOfType(cpg: Cpg, typeName: String, methodName: String): Traversal[Method] =
     cpg.typeDecl.nameExact(typeName).method.nameExact(methodName)
 
-  protected def getLiteralOfType(cpg: Cpg, typeName: String, literalName: String): Traversal[Literal] =
+  protected def getLiteralOfType(
+      cpg: Cpg,
+      typeName: String,
+      literalName: String
+  ): Traversal[Literal] =
     cpg.typeDecl.nameExact(typeName).method.isLiteral.codeExact(literalName)
 
   protected def flowToResultPairs(path: Path): List[(String, Option[Integer])] = {
     val pairs = path.elements.map {
       case point: MethodParameterIn =>
-        val method = point.method.head
+        val method      = point.method.head
         val method_name = method.name
-        val code = s"$method_name(${method.parameter.l.sortBy(_.order).map(_.code).mkString(", ")})"
+        val code        = s"$method_name(${method.parameter.l.sortBy(_.order).map(_.code).mkString(", ")})"
         (code, point.lineNumber)
       case point => (point.statement.repr, point.lineNumber)
     }
-    pairs.headOption.map(x => x :: pairs.sliding(2).collect { case Seq(a, b) if a != b => b }.toList).getOrElse(List())
+    pairs.headOption
+      .map(x => x :: pairs.sliding(2).collect { case Seq(a, b) if a != b => b }.toList)
+      .getOrElse(List())
   }
 }
