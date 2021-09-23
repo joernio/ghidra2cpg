@@ -168,7 +168,7 @@ class Ghidra2Cpg(
       case "AARCH64" => new Arm
       case _         => new X86
     }
- 
+
     functions.distinctBy(_.getName).foreach { function =>
       new FunctionPass(
         processor,
@@ -185,6 +185,7 @@ class Ghidra2Cpg(
     }
 
     new TypesPass(cpg).createAndApply()
+
     new MethodStubCreator(cpg).createAndApply()
     new MethodDecoratorPass(cpg).createAndApply()
     new Linker(cpg).createAndApply()
@@ -194,6 +195,7 @@ class Ghidra2Cpg(
     new MethodExternalDecoratorPass(cpg).createAndApply()
     new ContainsEdgePass(cpg).createAndApply()
     new NamespaceCreator(cpg).createAndApply()
+
     new ReachingDefPass(cpg).createAndApply()
     cpg.close()
   }

@@ -19,7 +19,7 @@ class GhidraFrontend extends LanguageFrontend {
     val tempDir = Files.createTempDirectory("ghidra2cpg").toFile
     Runtime.getRuntime.addShutdownHook(new Thread(() => FileUtils.deleteQuietly(tempDir)))
 
-    val cpgBin    = dir.getAbsolutePath
+    val cpgBin = dir.getAbsolutePath
     new Ghidra2Cpg(
       inputFile,
       Some(cpgBin)
@@ -33,5 +33,5 @@ class GhidraFrontend extends LanguageFrontend {
 }
 
 class GhidraBinToCpgSuite extends BinToCpgFixture(new GhidraFrontend) {
-  override val binDirectory  = ProjectRoot.relativise("ghidra2cpg-tests/src/test/testbinaries/")
+  override val binDirectory = ProjectRoot.relativise("ghidra2cpg-tests/src/test/testbinaries/")
 }
