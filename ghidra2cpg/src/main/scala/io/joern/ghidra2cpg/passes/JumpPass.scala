@@ -17,9 +17,12 @@ class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
       .nameExact("<operator>.goto")
       .where(_.argument.order(1).isLiteral)
       .foreach { sourceCall =>
-        val destinationAddress = sourceCall.argument.order(1).code.l.headOption.getOrElse("")
-        cpg.call.lineNumber(Integer.parseInt(destinationAddress, 16)).foreach { destination =>
-          diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
+        sourceCall.argument.order(1).code.l.headOption match {
+          case Some(destinationAddress) =>
+            cpg.call.lineNumber(Integer.parseInt(destinationAddress, 16)).foreach { destination =>
+              diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
+            }
+          case _ => //
         }
       }
     Iterator(diffGraph.build())
