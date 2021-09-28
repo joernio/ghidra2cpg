@@ -48,8 +48,10 @@ class DataFlowTests extends GhidraBinToCpgSuite {
     )
     val semantics: Semantics            = Semantics.fromList(new Parser().parseFile(semanticsFilename))
     implicit var context: EngineContext = EngineContext(semantics)
-
+    println(s"STARTING DATAFLOW")
     def source = cpg.method.name("dataflow").call.argument.code("1")
+    println(s"SOURCE: ${source.l}")
+
     def sink = cpg.method
       .name("dataflow")
       .call
@@ -57,8 +59,9 @@ class DataFlowTests extends GhidraBinToCpgSuite {
       .argument
       .order(1)
       .code("EAX")
+    println(s"SINK ${sink.l}")
     val flows = sink.reachableByFlows(source).l
-
+    println(flows.map(flowToResultPairs).toSet)
     flows.map(flowToResultPairs).toSet shouldBe
       Set(List("ADD EAX,0x1", "MOV EDX,EAX", "MOV ECX,EDX", "MOV EAX,ECX"))
   }
