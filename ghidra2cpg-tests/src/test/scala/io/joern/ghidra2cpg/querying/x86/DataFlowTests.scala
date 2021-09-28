@@ -14,6 +14,7 @@ import io.shiftleft.utils.ProjectRoot
 class DataFlowTests extends GhidraBinToCpgSuite {
 
   override def passes(cpg: Cpg): Unit = {
+    Thread.sleep(1000)
     val context = new LayerCreatorContext(cpg)
     new Scpg().run(context)
 
