@@ -320,16 +320,11 @@ class FunctionPass(
         diffGraph.addNode(instructionNode)
         handleArguments(instruction, instructionNode)
         diffGraph.addEdge(blockNode, instructionNode, EdgeTypes.AST)
-        // If the previous instruction is an unconditional jump,
-        // than we are not making any edges between previous and current instruction
-        if (!prevInstructionNode.code.startsWith("JMP")) {
-          diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
-        }
+        diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
         prevInstructionNode = instructionNode
       }
     }
   }
-
   def checkIfExternal(functionName: String): Boolean = {
     currentProgram.getFunctionManager.getExternalFunctions
       .iterator()
@@ -386,7 +381,6 @@ class FunctionPass(
         diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
       }
   }
-
   override def runOnPart(part: String): Iterator[DiffGraph] = {
     createMethodNode()
     handleParameters()
