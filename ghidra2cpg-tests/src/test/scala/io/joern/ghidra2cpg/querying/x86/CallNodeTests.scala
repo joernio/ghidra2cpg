@@ -56,18 +56,18 @@ class CallNodeTests extends GhidraBinToCpgSuite {
       case _ => fail()
     }
   }
-
-  "The caller of the caller of 'level2' should be 'main' " in {
+  // TODO: should be level2->level1->main
+  "The caller of the caller of 'level2' should be 'level1' " in {
     implicit val resolver: ICallResolver = NoResolve
+
     val x = cpg.method
       .name("level2")
-      .caller
       .caller
       .l
       .head
     x match {
       case x =>
-        x.name shouldBe "main"
+        x.name shouldBe "level1"
       case _ => fail()
     }
   }

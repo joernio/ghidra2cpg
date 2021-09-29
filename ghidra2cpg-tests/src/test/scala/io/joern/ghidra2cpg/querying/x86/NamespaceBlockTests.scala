@@ -57,6 +57,8 @@ class NamespaceBlockTests extends GhidraBinToCpgSuite {
       "__libc_csu_fini",
       "_fini",
       "_ITM_deregisterTMCloneTable",
+      "__stack_chk_fail",
+      "printf",
       "__libc_start_main",
       "__gmon_start__",
       "_ITM_registerTMCloneTable",
