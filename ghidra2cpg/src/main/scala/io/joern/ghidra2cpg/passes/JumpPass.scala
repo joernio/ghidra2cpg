@@ -2,7 +2,7 @@ package io.joern.ghidra2cpg.passes
 
 import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.generated.EdgeTypes
-import io.shiftleft.codepropertygraph.generated.nodes.Method
+import io.shiftleft.codepropertygraph.generated.nodes.{Call, Method}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 import io.shiftleft.semanticcpg.language._
 
@@ -22,13 +22,13 @@ class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
 
   override def runOnPart(method: Method): Iterator[DiffGraph] = {
     implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
-    method.call
+    method.ast.filter(_.isInstanceOf[Call]).map(_.asInstanceOf[Call])
       .nameExact("<operator>.goto")
       .where(_.argument.order(1).isLiteral)
       .foreach { sourceCall =>
         sourceCall.argument.order(1).code.l.headOption.flatMap(parseAddress) match {
           case Some(destinationAddress) =>
-            method.call.lineNumber(destinationAddress).foreach { destination =>
+            method.ast.filter(_.isInstanceOf[Call]).lineNumber(destinationAddress).foreach { destination =>
               diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
             }
           case _ => // Ignore for now
