@@ -158,7 +158,7 @@ class Ghidra2Cpg(
       case _         => new X86
     }
 
-    functions.distinctBy(_.getName).foreach { function =>
+    functions.foreach { function =>
       new FunctionPass(
         processor,
         currentProgram,

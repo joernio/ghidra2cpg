@@ -28,9 +28,8 @@ class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
       .foreach { sourceCall =>
         sourceCall.argument.order(1).code.l.headOption.flatMap(parseAddress) match {
           case Some(destinationAddress) =>
-            method.call.lineNumber(destinationAddress).foreach {
-              destination =>
-                diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
+            method.call.lineNumber(destinationAddress).foreach { destination =>
+              diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
             }
           case _ => // Ignore for now
           /*

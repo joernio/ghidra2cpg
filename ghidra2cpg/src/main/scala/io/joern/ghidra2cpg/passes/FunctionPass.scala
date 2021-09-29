@@ -344,7 +344,7 @@ class FunctionPass(
         .NewMethod()
         .code(function.getName)
         .name(function.getName)
-        .fullName(function.getName)
+        .fullName(function.getSignature(true).toString)
         .isExternal(checkIfExternal(function.getName))
         .signature(function.getSignature(true).toString)
         .lineNumber(Some(function.getEntryPoint.getOffsetAsBigInteger.intValue()))
