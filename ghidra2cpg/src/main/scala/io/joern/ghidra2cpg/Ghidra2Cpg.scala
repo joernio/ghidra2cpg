@@ -143,7 +143,7 @@ class Ghidra2Cpg(
 
     // We touch every function twice, regular ASM and PCode
     // Also we have + 2 for MetaDataPass and Namespacepass
-    val numOfKeypools = functions.size * 2 + 2
+    val numOfKeypools = functions.size * 3 + 2
     val keyPools      = KeyPoolCreator.obtain(numOfKeypools).iterator
 
     // Actual CPG construction
@@ -174,7 +174,7 @@ class Ghidra2Cpg(
     }
 
     new TypesPass(cpg).createAndApply()
-    new JumpPass(cpg).createAndApply()
+    new JumpPass(cpg, keyPools.next).createAndApply()
     cpg.close()
   }
 

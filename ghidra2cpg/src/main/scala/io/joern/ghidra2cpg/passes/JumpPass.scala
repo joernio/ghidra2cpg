@@ -3,15 +3,19 @@ package io.joern.ghidra2cpg.passes
 import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.generated.EdgeTypes
 import io.shiftleft.codepropertygraph.generated.nodes.Method
-import io.shiftleft.passes.{ConcurrentWriterCpgPass, DiffGraph}
+import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 import io.shiftleft.semanticcpg.language._
 
-class JumpPass(cpg: Cpg) extends ConcurrentWriterCpgPass[Method](cpg) {
+class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
+  extends ParallelCpgPass[Method](
+    cpg,
+    keyPools = Some(keyPool.split(1))
+  ) {
 
-  override def generateParts(): Array[Method] = cpg.method.toArray
+  override def partIterator: Iterator[Method] = cpg.method.l.iterator
 
-  override def runOnPart(diffGraph: DiffGraph.Builder, method: Method): Unit = {
-    implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
+  override def runOnPart(method: Method): Iterator[DiffGraph] = {
+  implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
     method.call
       .nameExact("<operator>.goto")
       .where(_.argument.order(1).isLiteral)
@@ -29,5 +33,6 @@ class JumpPass(cpg: Cpg) extends ConcurrentWriterCpgPass[Method](cpg) {
            */
         }
       }
+    Iterator(diffGraph.build())
   }
 }
