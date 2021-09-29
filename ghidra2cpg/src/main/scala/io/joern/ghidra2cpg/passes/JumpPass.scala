@@ -22,14 +22,17 @@ class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
 
   override def runOnPart(method: Method): Iterator[DiffGraph] = {
     implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
-    method.ast.filter(_.isInstanceOf[Call]).map(_.asInstanceOf[Call])
+    method.ast
+      .filter(_.isInstanceOf[Call])
+      .map(_.asInstanceOf[Call])
       .nameExact("<operator>.goto")
       .where(_.argument.order(1).isLiteral)
       .foreach { sourceCall =>
         sourceCall.argument.order(1).code.l.headOption.flatMap(parseAddress) match {
           case Some(destinationAddress) =>
-            method.ast.filter(_.isInstanceOf[Call]).lineNumber(destinationAddress).foreach { destination =>
-              diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
+            method.ast.filter(_.isInstanceOf[Call]).lineNumber(destinationAddress).foreach {
+              destination =>
+                diffGraph.addEdge(sourceCall, destination, EdgeTypes.CFG)
             }
           case _ => // Ignore for now
           /*
