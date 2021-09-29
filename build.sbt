@@ -3,7 +3,7 @@ ThisBuild/organization := "io.joern"
 ThisBuild/scalaVersion := "2.13.5"
 // don't upgrade to 2.13.6 until https://github.com/com-lihaoyi/Ammonite/issues/1182 is resolved
 
-val cpgVersion = "1.3.346"
+val cpgVersion = "1.3.348"
 
 ThisBuild / resolvers ++= Seq(
   Resolver.mavenLocal,
