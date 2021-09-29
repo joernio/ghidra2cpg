@@ -9,10 +9,10 @@ import io.shiftleft.semanticcpg.language._
 import scala.util.Try
 
 class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
-  extends ParallelCpgPass[Method](
-    cpg,
-    keyPools = Some(keyPool.split(1))
-  ) {
+    extends ParallelCpgPass[Method](
+      cpg,
+      keyPools = Some(keyPool.split(1))
+    ) {
 
   override def partIterator: Iterator[Method] = cpg.method.l.iterator
 
@@ -21,7 +21,7 @@ class JumpPass(cpg: Cpg, keyPool: IntervalKeyPool)
   }
 
   override def runOnPart(method: Method): Iterator[DiffGraph] = {
-  implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
+    implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
     method.call
       .nameExact("<operator>.goto")
       .where(_.argument.order(1).isLiteral)
