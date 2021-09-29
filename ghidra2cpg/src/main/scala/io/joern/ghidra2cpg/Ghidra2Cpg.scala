@@ -13,28 +13,17 @@ import ghidra.program.model.listing.Program
 import ghidra.program.util.GhidraProgramUtilities
 import ghidra.util.exception.InvalidInputException
 import ghidra.util.task.TaskMonitor
-import io.joern.ghidra2cpg.passes.{FunctionPass, MetaDataPass, NamespacePass, TypesPass}
+import io.joern.ghidra2cpg.passes._
 import io.joern.ghidra2cpg.processors._
-import io.shiftleft.dataflowengineoss.passes.reachingdef.ReachingDefPass
 import io.shiftleft.passes.KeyPoolCreator
-import io.shiftleft.semanticcpg.passes.FileCreationPass
-import io.shiftleft.semanticcpg.passes.containsedges.ContainsEdgePass
-import io.shiftleft.semanticcpg.passes.languagespecific.fuzzyc.MethodStubCreator
-import io.shiftleft.semanticcpg.passes.linking.calllinker.StaticCallLinker
-import io.shiftleft.semanticcpg.passes.linking.linker.Linker
-import io.shiftleft.semanticcpg.passes.linking.memberaccesslinker.MemberAccessLinker
-import io.shiftleft.semanticcpg.passes.methoddecorations.MethodDecoratorPass
-import io.shiftleft.semanticcpg.passes.methodexternaldecorator.MethodExternalDecoratorPass
-import io.shiftleft.semanticcpg.passes.namespacecreator.NamespaceCreator
 import io.shiftleft.x2cpg.X2Cpg
 import org.apache.commons.io.FileUtils
 import utilities.util.FileUtilities
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
-
 object Types {
 
   // Types will be added to the CPG as soon as everything
@@ -154,7 +143,7 @@ class Ghidra2Cpg(
 
     // We touch every function twice, regular ASM and PCode
     // Also we have + 2 for MetaDataPass and Namespacepass
-    val numOfKeypools = functions.size * 2 + 2
+    val numOfKeypools = functions.size * 3 + 2
     val keyPools      = KeyPoolCreator.obtain(numOfKeypools).iterator
 
     // Actual CPG construction
@@ -185,6 +174,7 @@ class Ghidra2Cpg(
     }
 
     new TypesPass(cpg).createAndApply()
+    new JumpPass(cpg, keyPools.next).createAndApply()
     cpg.close()
   }
 

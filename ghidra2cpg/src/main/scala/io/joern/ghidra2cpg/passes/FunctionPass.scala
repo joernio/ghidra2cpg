@@ -315,16 +315,23 @@ class FunctionPass(
       handleArguments(instructions.head, prevInstructionNode)
       diffGraph.addEdge(blockNode, prevInstructionNode, EdgeTypes.AST)
       diffGraph.addEdge(methodNode.get, prevInstructionNode, EdgeTypes.CFG)
+      diffGraph.addEdge(methodNode.get, prevInstructionNode, EdgeTypes.CONTAINS)
       instructions.drop(1).foreach { instruction =>
         val instructionNode = addCallNode(instruction)
         diffGraph.addNode(instructionNode)
         handleArguments(instruction, instructionNode)
         diffGraph.addEdge(blockNode, instructionNode, EdgeTypes.AST)
-        diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
+        diffGraph.addEdge(methodNode.get, instructionNode, EdgeTypes.CONTAINS)
+        // Not connecting previous instruction if it is an unconditional jump
+        // TODO: this needs to be adjusted to other architectures
+        if (!prevInstructionNode.code.startsWith("JMP")) {
+          diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
+        }
         prevInstructionNode = instructionNode
       }
     }
   }
+
   def checkIfExternal(functionName: String): Boolean = {
     currentProgram.getFunctionManager.getExternalFunctions
       .iterator()
@@ -381,6 +388,7 @@ class FunctionPass(
         diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
       }
   }
+
   override def runOnPart(part: String): Iterator[DiffGraph] = {
     createMethodNode()
     handleParameters()

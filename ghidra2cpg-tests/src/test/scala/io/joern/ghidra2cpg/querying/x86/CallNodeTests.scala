@@ -35,10 +35,10 @@ class CallNodeTests extends GhidraBinToCpgSuite {
         _.argument
           .order(2)
           .code("a")
-      )
-      .l match {
-      case List(x) =>
-        x.code shouldBe "MOV dword ptr [RBP + -0x4],0xa"
+      ).head.code
+    match {
+      case x =>
+        x shouldBe "MOV dword ptr [RBP + -0x4],0xa"
       case _ => fail()
     }
   }
@@ -62,9 +62,9 @@ class CallNodeTests extends GhidraBinToCpgSuite {
       .name("level2")
       .caller
       .caller
-      .l
+      .l.head
     x match {
-      case List(x) =>
+      case x =>
         x.name shouldBe "main"
       case _ => fail()
     }
@@ -75,8 +75,8 @@ class CallNodeTests extends GhidraBinToCpgSuite {
     cpg.method
       .name("level2")
       .caller
-      .l match {
-      case List(x) =>
+      .l.head match {
+      case x =>
         x.name shouldBe "level1"
       case _ => fail()
     }
