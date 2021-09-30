@@ -14,7 +14,7 @@ import ghidra.program.util.GhidraProgramUtilities
 import ghidra.util.exception.InvalidInputException
 import ghidra.util.task.TaskMonitor
 import io.joern.ghidra2cpg.passes._
-import io.joern.ghidra2cpg.processors._
+import io.joern.ghidra2cpg.passes.processors._
 import io.shiftleft.passes.KeyPoolCreator
 import io.shiftleft.x2cpg.X2Cpg
 import org.apache.commons.io.FileUtils

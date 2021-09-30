@@ -4,36 +4,29 @@ import ghidra.app.decompiler.DecompInterface
 import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.address.GenericAddress
 import ghidra.program.model.lang.Register
-import ghidra.program.model.listing.{
-  CodeUnitFormat,
-  CodeUnitFormatOptions,
-  Function,
-  Instruction,
-  Program
-}
+import ghidra.program.model.listing.{Function, Instruction, Program}
 import ghidra.program.model.scalar.Scalar
 import ghidra.util.task.ConsoleTaskMonitor
 import io.joern.ghidra2cpg._
-import io.joern.ghidra2cpg.processors._
+import io.joern.ghidra2cpg.passes.processors.Processor
 import io.shiftleft.codepropertygraph.Cpg
-import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewCallBuilder, NewMethod}
+import io.shiftleft.codepropertygraph.generated.nodes.{Method, NewCall, NewMethod}
 import io.shiftleft.codepropertygraph.generated.{EdgeTypes, NodeTypes, nodes}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
-import io.shiftleft.proto.cpg.Cpg.DispatchTypes
 
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
 class FunctionPass(
-    processor: Processor,
-    currentProgram: Program,
-    filename: String,
-    functions: List[Function],
-    function: Function,
-    cpg: Cpg,
-    keyPool: IntervalKeyPool,
-    decompInterface: DecompInterface,
-    flatProgramAPI: FlatProgramAPI
+                    processor: Processor,
+                    currentProgram: Program,
+                    filename: String,
+                    functions: List[Function],
+                    function: Function,
+                    cpg: Cpg,
+                    keyPool: IntervalKeyPool,
+                    decompInterface: DecompInterface,
+                    flatProgramAPI: FlatProgramAPI
 ) extends ParallelCpgPass[String](
       cpg,
       keyPools = Some(keyPool.split(1))
@@ -43,21 +36,6 @@ class FunctionPass(
   private var methodNode: Option[NewMethod] = None
   // we need it just once with default settings
   private val blockNode = nodes.NewBlock().code("").order(0)
-  // needed by ghidra for decompiling reasons
-  private val codeUnitFormat: CodeUnitFormat = new CodeUnitFormat(
-    new CodeUnitFormatOptions(
-      CodeUnitFormatOptions.ShowBlockName.NEVER,
-      CodeUnitFormatOptions.ShowNamespace.NEVER,
-      "",
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    )
-  )
 
   override def partIterator: Iterator[String] = List("").iterator
 
@@ -74,7 +52,7 @@ class FunctionPass(
       callNode: NewCall
   ): Unit = {
     if (instruction.getMnemonicString.contains("CALL")) {
-      val mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
+      val mnemonicName = processor.codeUnitFormat.getOperandRepresentationString(instruction, 0)
       val callee       = functions.find(xx => xx.getName().equals(mnemonicName))
       if (callee.nonEmpty) {
         // Array of tuples containing (checked parameter name, parameter index, parameter data type)
@@ -228,7 +206,7 @@ class FunctionPass(
         .asScala
         .toSeq
         .filter(_.isParameter)
-        .foreach { case parameter =>
+        .foreach { parameter =>
           var checkedParameter = ""
           if (parameter.getStorage.getRegister == null) {
             checkedParameter = parameter.getName
@@ -269,62 +247,27 @@ class FunctionPass(
     }
   }
 
-  def sanitizeMethodName(methodName: String): String = {
-    methodName.split(">").lastOption.getOrElse(methodName).replace("[", "").replace("]", "")
-  }
 
-  def addCallNode(instruction: Instruction): NewCall = {
-    val node: NewCallBuilder = nodes.NewCall()
-    var code: String         = ""
-    val mnemonicName =
-      processor.getInstructions
-        .getOrElse(instruction.getMnemonicString, "UNKNOWN") match {
-        case "LEAVE" | "RET" =>
-          code = "RET"
-          "RET"
-        case "CALL" =>
-          val operandRepresentationString = sanitizeMethodName(
-            codeUnitFormat.getOperandRepresentationString(instruction, 0)
-          )
-          code = operandRepresentationString
-          operandRepresentationString
-        case "UNKNOWN" =>
-          code = instruction.toString
-          "UNKNOWN"
-        case operator =>
-          code = instruction.toString
-          operator
-      }
-
-    node
-      .name(mnemonicName)
-      .code(code)
-      .order(0)
-      .methodFullName(mnemonicName)
-      .dispatchType(DispatchTypes.STATIC_DISPATCH.name())
-      .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
-      .build
-  }
 
   def handleBody(): Unit = {
     val addressSet = function.getBody
     var instructions =
       currentProgram.getListing.getInstructions(addressSet, true).iterator().asScala.toList
     if (instructions.nonEmpty) {
-      var prevInstructionNode = addCallNode(instructions.head)
+      var prevInstructionNode = processor.addCallNode(instructions.head)
       handleArguments(instructions.head, prevInstructionNode)
       diffGraph.addEdge(blockNode, prevInstructionNode, EdgeTypes.AST)
       diffGraph.addEdge(methodNode.get, prevInstructionNode, EdgeTypes.CFG)
       instructions.drop(1).foreach { instruction =>
-        val instructionNode = addCallNode(instruction)
+        val instructionNode = processor.addCallNode(instruction)
         diffGraph.addNode(instructionNode)
         handleArguments(instruction, instructionNode)
         diffGraph.addEdge(blockNode, instructionNode, EdgeTypes.AST)
         // Not connecting previous instruction if it is an unconditional jump
         // TODO: this needs to be adjusted to other architectures
-        if (!prevInstructionNode.code.startsWith("JMP")) {
-          diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
-        }
+        //if (!prevInstructionNode.code.startsWith("JMP")) {
+        //  diffGraph.addEdge(prevInstructionNode, instructionNode, EdgeTypes.CFG)
+        //}
         prevInstructionNode = instructionNode
       }
     }

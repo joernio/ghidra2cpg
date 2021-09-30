@@ -1,5 +1,15 @@
-package io.joern.ghidra2cpg.processors
+package io.joern.ghidra2cpg.passes.processors
+
+import ghidra.program.model.listing.Instruction
+import io.shiftleft.codepropertygraph.generated.nodes
+import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewCallBuilder}
+import io.shiftleft.proto.cpg.Cpg.DispatchTypes
+
+import io.shiftleft.semanticcpg.language._
 import scala.collection.immutable._
+import scala.language.implicitConversions
+
+
 class X86 extends Processor {
   override def getInstructions: HashMap[String, String] =
     HashMap(
@@ -94,4 +104,36 @@ class X86 extends Processor {
       "XADD"      -> "<operator>.incBy",
       "XOR"       -> "<operator>.assignmentXor"
     )
+  def addCallNode(instruction: Instruction): NewCall = {
+    val node: NewCallBuilder = nodes.NewCall()
+    var code: String         = ""
+    val mnemonicName =
+      getInstructions
+        .getOrElse(instruction.getMnemonicString, "UNKNOWN") match {
+        case "LEAVE" | "RET" =>
+          code = "RET"
+          "RET"
+        case "CALL" =>
+          val operandRepresentationString = sanitizeMethodName(
+            codeUnitFormat.getOperandRepresentationString(instruction, 0)
+          )
+          code = operandRepresentationString
+          operandRepresentationString
+        case "UNKNOWN" =>
+          code = instruction.toString
+          "UNKNOWN"
+        case operator =>
+          code = instruction.toString
+          operator
+      }
+
+    node
+      .name(mnemonicName)
+      .code(code)
+      .order(0)
+      .methodFullName(mnemonicName)
+      .dispatchType(DispatchTypes.STATIC_DISPATCH.name())
+      .lineNumber(instruction.getMinAddress.getOffsetAsBigInteger.intValue)
+      .build
+  }
 }
