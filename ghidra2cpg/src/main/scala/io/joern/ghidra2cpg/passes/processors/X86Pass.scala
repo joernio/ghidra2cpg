@@ -1,16 +1,22 @@
 package io.joern.ghidra2cpg.passes.processors
 
-import ghidra.program.model.listing.Instruction
+import ghidra.app.decompiler.DecompInterface
+import ghidra.program.flatapi.FlatProgramAPI
+import ghidra.program.model.listing.{Function, Instruction, Program}
+import io.shiftleft.codepropertygraph.Cpg
 import io.shiftleft.codepropertygraph.generated.nodes
 import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewCallBuilder}
+import io.shiftleft.passes.IntervalKeyPool
 import io.shiftleft.proto.cpg.Cpg.DispatchTypes
-
 import io.shiftleft.semanticcpg.language._
+
 import scala.collection.immutable._
 import scala.language.implicitConversions
 
-
-class X86 extends Processor {
+class X86Pass(
+    cpg: Cpg,
+    keyPool: IntervalKeyPool
+) extends FunctionPass(cpg, Option(keyPool.split(1))) {
   override def getInstructions: HashMap[String, String] =
     HashMap(
       "ADD"       -> "<operator>.incBy",

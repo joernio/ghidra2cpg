@@ -1,43 +1,71 @@
-package io.joern.ghidra2cpg.passes
+package io.joern.ghidra2cpg.passes.processors
 
 import ghidra.app.decompiler.DecompInterface
 import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.address.GenericAddress
 import ghidra.program.model.lang.Register
-import ghidra.program.model.listing.{Function, Instruction, Program}
+import ghidra.program.model.listing.{
+  CodeUnitFormat,
+  CodeUnitFormatOptions,
+  Function,
+  Instruction,
+  Program
+}
 import ghidra.program.model.scalar.Scalar
 import ghidra.util.task.ConsoleTaskMonitor
 import io.joern.ghidra2cpg._
-import io.joern.ghidra2cpg.passes.processors.Processor
 import io.shiftleft.codepropertygraph.Cpg
-import io.shiftleft.codepropertygraph.generated.nodes.{Method, NewCall, NewMethod}
+import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewMethod}
 import io.shiftleft.codepropertygraph.generated.{EdgeTypes, NodeTypes, nodes}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 
+import scala.collection.immutable.{HashMap, List}
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
-class FunctionPass(
-                    processor: Processor,
-                    currentProgram: Program,
-                    filename: String,
-                    functions: List[Function],
-                    function: Function,
-                    cpg: Cpg,
-                    keyPool: IntervalKeyPool,
-                    decompInterface: DecompInterface,
-                    flatProgramAPI: FlatProgramAPI
+abstract class FunctionPass(
+    cpg: Cpg,
+    keyPool: Option[IntervalKeyPool]
 ) extends ParallelCpgPass[String](
       cpg,
       keyPools = Some(keyPool.split(1))
     ) {
+  var currentProgram:Program
+  var functions:List[Function]
+  def setProgram(currentProgram: Program): Unit = {
+    this.currentProgram = currentProgram
+    this
+  }
+  def setFunctions(functions: List[Function]): Unit = this.functions = functions
 
+  // needed by ghidra for decompiling reasons
+  val codeUnitFormat: CodeUnitFormat = new CodeUnitFormat(
+    new CodeUnitFormatOptions(
+      CodeUnitFormatOptions.ShowBlockName.NEVER,
+      CodeUnitFormatOptions.ShowNamespace.NEVER,
+      "",
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    )
+  )
   implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
   private var methodNode: Option[NewMethod] = None
   // we need it just once with default settings
   private val blockNode = nodes.NewBlock().code("").order(0)
 
   override def partIterator: Iterator[String] = List("").iterator
+
+  def getInstructions: HashMap[String, String]
+  def addCallNode(instruction: Instruction): NewCall
+
+  def sanitizeMethodName(methodName: String): String = {
+    methodName.split(">").lastOption.getOrElse(methodName).replace("[", "").replace("]", "")
+  }
 
   implicit def intToIntegerOption(intOption: Option[Int]): Option[Integer] = {
     intOption.map(intValue => {
@@ -246,8 +274,6 @@ class FunctionPass(
       diffGraph.addEdge(identifier, localNode, EdgeTypes.REF)
     }
   }
-
-
 
   def handleBody(): Unit = {
     val addressSet = function.getBody

@@ -152,27 +152,26 @@ class Ghidra2Cpg(
     new MetaDataPass(fileAbsolutePath, cpg, keyPools.next()).createAndApply()
     new NamespacePass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
 
-    val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
-      case "MIPS"    => new Mips
-      case "AARCH64" => new Arm
-      case _         => new X86
-    }
+    val functionPass =
+      currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
+        case "MIPS" =>
+          new MipsPass(cpg, keyPools.next())
+        case "AARCH64" =>
+          new ArmPass(cpg, keyPools.next())
+        case _ =>
+          new X86Pass(cpg, keyPools.next())
+      }
+    functionPass
+      .setProgram(currentProgram)
+      //.setAbsolutePath(fileAbsolutePath)
+      .setFunctions(functions)
+      .setCpg(cpg)
+      .setKeyPool(keyPools.next())
+      .setDecompilerInterface(decompilerInterface)
+      .setFlatProgramAPI(flatProgramAPI)
+      .createAndApply()
 
-    functions.foreach { function =>
-      new FunctionPass(
-        processor,
-        currentProgram,
-        fileAbsolutePath,
-        functions,
-        function,
-        cpg,
-        keyPools.next(),
-        decompilerInterface,
-        flatProgramAPI
-      )
-        .createAndApply()
-    }
-
+    //createAndApply()
     new TypesPass(cpg).createAndApply()
     new JumpPass(cpg, keyPools.next).createAndApply()
     cpg.close()
