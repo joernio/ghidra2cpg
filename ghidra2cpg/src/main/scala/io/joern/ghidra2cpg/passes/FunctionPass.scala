@@ -42,7 +42,7 @@ class FunctionPass(
   implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
   private var methodNode: Option[NewMethod] = None
   // we need it just once with default settings
-  private val blockNode = nodes.NewBlock().code("").order(0)
+  private val blockNode = nodes.NewBlock().code("").order(0).typeFullName("ANY")
   // needed by ghidra for decompiling reasons
   private val codeUnitFormat: CodeUnitFormat = new CodeUnitFormat(
     new CodeUnitFormatOptions(
@@ -381,7 +381,6 @@ class FunctionPass(
           .code(literal)
           .order(-1)
           .argumentIndex(-1)
-          .typeFullName(literal)
         diffGraph.addNode(node)
         diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
       }
