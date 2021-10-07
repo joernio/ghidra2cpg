@@ -16,7 +16,7 @@ import ghidra.util.task.ConsoleTaskMonitor
 import io.joern.ghidra2cpg._
 import io.joern.ghidra2cpg.processors._
 import io.shiftleft.codepropertygraph.Cpg
-import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewCallBuilder, NewMethod}
+import io.shiftleft.codepropertygraph.generated.nodes.{NewCall, NewMethod}
 import io.shiftleft.codepropertygraph.generated.{EdgeTypes, NodeTypes, nodes}
 import io.shiftleft.passes.{DiffGraph, IntervalKeyPool, ParallelCpgPass}
 import io.shiftleft.proto.cpg.Cpg.DispatchTypes
@@ -75,7 +75,7 @@ class FunctionPass(
   ): Unit = {
     if (instruction.getMnemonicString.contains("CALL")) {
       val mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
-      val callee       = functions.find(xx => xx.getName().equals(mnemonicName))
+      val callee       = functions.find(function => function.getName().equals(mnemonicName))
       if (callee.nonEmpty) {
         // Array of tuples containing (checked parameter name, parameter index, parameter data type)
         var checkedParameters: Array[(String, Int, String)] = Array.empty
@@ -274,7 +274,7 @@ class FunctionPass(
   }
 
   def addCallNode(instruction: Instruction): NewCall = {
-    val node: NewCallBuilder = nodes.NewCall()
+    val node = nodes.NewCall()
     var code: String         = ""
     val mnemonicName =
       processor.getInstructions
@@ -303,7 +303,7 @@ class FunctionPass(
       .methodFullName(mnemonicName)
       .dispatchType(DispatchTypes.STATIC_DISPATCH.name())
       .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
-      .build
+      //.build
   }
 
   def handleBody(): Unit = {
