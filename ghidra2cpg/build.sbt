@@ -1,7 +1,6 @@
 name := "ghidra2cpg"
 
 enablePlugins(JavaAppPackaging)
-enablePlugins(GitVersioning)
 
 val cpgVersion = Versions.cpgVersion
 
