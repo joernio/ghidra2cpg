@@ -73,9 +73,13 @@ class FunctionPass(
       instruction: Instruction,
       callNode: NewCall
   ): Unit = {
-    if (instruction.getMnemonicString.contains("CALL")) {
-      val mnemonicName = codeUnitFormat.getOperandRepresentationString(instruction, 0)
-      val callee       = functions.find(function => function.getName().equals(mnemonicName))
+    val mnemonicString = instruction.getMnemonicString
+    if (mnemonicString.equals("CALL") || mnemonicString.equals("jalr")) {
+      // TODO: move this somewhere else
+      val mipsPrefix = "^t9=>".r
+      val calledFunction =
+        mipsPrefix.replaceFirstIn(codeUnitFormat.getOperandRepresentationString(instruction, 0), "")
+      val callee = functions.find(function => function.getName().equals(calledFunction))
       if (callee.nonEmpty) {
         // Array of tuples containing (checked parameter name, parameter index, parameter data type)
         var checkedParameters: Array[(String, Int, String)] = Array.empty
@@ -228,7 +232,7 @@ class FunctionPass(
         .asScala
         .toSeq
         .filter(_.isParameter)
-        .foreach { case parameter =>
+        .foreach { parameter =>
           var checkedParameter = ""
           if (parameter.getStorage.getRegister == null) {
             checkedParameter = parameter.getName
@@ -274,8 +278,8 @@ class FunctionPass(
   }
 
   def addCallNode(instruction: Instruction): NewCall = {
-    val node = nodes.NewCall()
-    var code: String         = ""
+    val node         = nodes.NewCall()
+    var code: String = ""
     val mnemonicName =
       processor.getInstructions
         .getOrElse(instruction.getMnemonicString, "UNKNOWN") match {
@@ -303,12 +307,12 @@ class FunctionPass(
       .methodFullName(mnemonicName)
       .dispatchType(DispatchTypes.STATIC_DISPATCH.name())
       .lineNumber(Some(instruction.getMinAddress.getOffsetAsBigInteger.intValue))
-      //.build
+    //.build
   }
 
   def handleBody(): Unit = {
     val addressSet = function.getBody
-    var instructions =
+    val instructions =
       currentProgram.getListing.getInstructions(addressSet, true).iterator().asScala.toList
     if (instructions.nonEmpty) {
       var prevInstructionNode = addCallNode(instructions.head)
