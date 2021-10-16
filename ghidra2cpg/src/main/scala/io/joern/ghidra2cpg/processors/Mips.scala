@@ -6,6 +6,7 @@ class Mips extends Processor {
     HashMap(
       "_addiu" -> "<operator>.assignment",
       "_li"    -> "<operator>.assignment",
+      "_lui"   -> "<operator>.assignment",
       "_lw"    -> "<operator>.assignment",
       "_nop"   -> "<operator>.NOP",
       "_or"    -> "<operator>.or",
