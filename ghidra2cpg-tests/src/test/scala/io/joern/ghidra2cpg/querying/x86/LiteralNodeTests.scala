@@ -11,7 +11,7 @@ class LiteralNodeTests extends GhidraBinToCpgSuite {
   }
 
   "should contain exactly one literal node containing \"TEST\" with all mandatory fields set" in {
-    cpg.method.name("literalNodeTest").literal.code("TEST").l match {
+    cpg.literal.code("TEST").l match {
       case List(x) =>
         x.code shouldBe "TEST"
       case _ => fail()
@@ -19,7 +19,7 @@ class LiteralNodeTests extends GhidraBinToCpgSuite {
   }
   "should contain exactly one node with all mandatory fields set" in {
     // keep in mind: 0x64 = 100
-    cpg.literal.code("64").l.size > 0
+    cpg.literal.code("64").l.nonEmpty
   }
 
   "should contain exactly one call with literal arguments" in {

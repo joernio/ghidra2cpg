@@ -175,7 +175,7 @@ class Ghidra2Cpg(
 
     new TypesPass(cpg).createAndApply()
     new JumpPass(cpg, keyPools.next).createAndApply()
-    new LiteralPass(cpg, currentProgram, keyPools.next).createAndApply()
+    new LiteralPass(cpg, currentProgram, flatProgramAPI, keyPools.next).createAndApply()
     cpg.close()
   }
 

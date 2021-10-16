@@ -1,5 +1,6 @@
 package io.joern.ghidra2cpg.passes
 
+import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.listing.Program
 import ghidra.program.util.DefinedDataIterator
 import io.shiftleft.codepropertygraph.Cpg
@@ -10,8 +11,12 @@ import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 import scala.util.Try
 
-class LiteralPass(cpg: Cpg, currentProgram: Program, keyPool: IntervalKeyPool)
-    extends ParallelCpgPass[String](
+class LiteralPass(
+    cpg: Cpg,
+    currentProgram: Program,
+    flatProgramAPI: FlatProgramAPI,
+    keyPool: IntervalKeyPool
+) extends ParallelCpgPass[String](
       cpg,
       keyPools = Some(keyPool.split(1))
     ) {
@@ -24,20 +29,31 @@ class LiteralPass(cpg: Cpg, currentProgram: Program, keyPool: IntervalKeyPool)
 
   override def runOnPart(part: String): Iterator[DiffGraph] = {
     implicit val diffGraph: DiffGraph.Builder = DiffGraph.newBuilder
-    DefinedDataIterator
-      .definedStrings(currentProgram)
-      .iterator
+    val literals = flatProgramAPI
+      .findStrings(currentProgram.getAddressFactory.getAddressSet, 4, 1, false, true)
       .asScala
-      .foreach { literal =>
-        val node = nodes
-          .NewLiteral()
-          .code(literal.getValue.toString)
-          .order(-1)
-          .argumentIndex(-1)
-          .typeFullName(literal.getValue.toString)
-        diffGraph.addNode(node)
+      .map { literal =>
+        flatProgramAPI
+          .getBytes(literal.getAddress, literal.getLength)
+          .map(_.toChar)
+          .mkString("")
+      } ++
+      DefinedDataIterator
+        .definedStrings(currentProgram)
+        .iterator
+        .asScala
+        .map(_.getValue.toString)
+
+    literals.sorted.distinct.foreach { literal =>
       //diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
-      }
+      val node = nodes
+        .NewLiteral()
+        .code(literal)
+        .order(-1)
+        .argumentIndex(-1)
+        .typeFullName(literal.toString)
+      diffGraph.addNode(node)
+    }
     Iterator(diffGraph.build())
   }
 }
