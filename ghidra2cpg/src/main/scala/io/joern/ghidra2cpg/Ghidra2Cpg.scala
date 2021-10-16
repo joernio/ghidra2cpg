@@ -143,14 +143,14 @@ class Ghidra2Cpg(
 
     // We touch every function twice, regular ASM and PCode
     // Also we have + 2 for MetaDataPass and Namespacepass
-    val numOfKeypools = functions.size * 3 + 2
-    val keyPools      = KeyPoolCreator.obtain(numOfKeypools).iterator
+    val numOfKeypools   = functions.size * 3 + 2
+    val keyPoolIterator = KeyPoolCreator.obtain(numOfKeypools).iterator
 
     // Actual CPG construction
     val cpg = X2Cpg.newEmptyCpg(outputFile)
 
-    new MetaDataPass(fileAbsolutePath, cpg, keyPools.next()).createAndApply()
-    new NamespacePass(cpg, fileAbsolutePath, keyPools.next()).createAndApply()
+    new MetaDataPass(fileAbsolutePath, cpg, keyPoolIterator.next()).createAndApply()
+    new NamespacePass(cpg, fileAbsolutePath, keyPoolIterator.next()).createAndApply()
 
     val processor = currentProgram.getLanguage.getLanguageDescription.getProcessor.toString match {
       case "MIPS"    => new Mips
@@ -166,16 +166,15 @@ class Ghidra2Cpg(
         functions,
         function,
         cpg,
-        keyPools.next(),
-        decompilerInterface,
-        flatProgramAPI
+        keyPoolIterator.next,
+        decompilerInterface
       )
         .createAndApply()
     }
 
     new TypesPass(cpg).createAndApply()
-    new JumpPass(cpg, keyPools.next).createAndApply()
-    new LiteralPass(cpg, currentProgram, flatProgramAPI, keyPools.next).createAndApply()
+    new JumpPass(cpg, keyPoolIterator.next).createAndApply()
+    new LiteralPass(cpg, currentProgram, flatProgramAPI, keyPoolIterator.next).createAndApply()
     cpg.close()
   }
 

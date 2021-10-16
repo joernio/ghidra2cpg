@@ -45,7 +45,6 @@ class LiteralPass(
         .map(_.getValue.toString)
 
     literals.sorted.distinct.foreach { literal =>
-      //diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
       val node = nodes
         .NewLiteral()
         .code(literal)

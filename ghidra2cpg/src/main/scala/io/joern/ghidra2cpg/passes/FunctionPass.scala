@@ -1,7 +1,6 @@
 package io.joern.ghidra2cpg.passes
 
 import ghidra.app.decompiler.DecompInterface
-import ghidra.program.flatapi.FlatProgramAPI
 import ghidra.program.model.address.GenericAddress
 import ghidra.program.model.lang.Register
 import ghidra.program.model.listing.{
@@ -32,8 +31,7 @@ class FunctionPass(
     function: Function,
     cpg: Cpg,
     keyPool: IntervalKeyPool,
-    decompInterface: DecompInterface,
-    flatProgramAPI: FlatProgramAPI
+    decompInterface: DecompInterface
 ) extends ParallelCpgPass[String](
       cpg,
       keyPools = Some(keyPool.split(1))
