@@ -370,33 +370,11 @@ class FunctionPass(
     diffGraph.addEdge(methodNode.get, methodReturn, EdgeTypes.AST)
   }
 
-  def handleLiterals(): Unit = {
-    flatProgramAPI
-      .findStrings(function.getBody, 4, 1, false, true)
-      .forEach { y =>
-        // get the actual value at the address
-        val literal = flatProgramAPI
-          .getBytes(y.getAddress, y.getLength)
-          .map(_.toChar)
-          .mkString("")
-
-        val node = nodes
-          .NewLiteral()
-          .code(literal)
-          .order(-1)
-          .argumentIndex(-1)
-          .typeFullName(literal)
-        diffGraph.addNode(node)
-        diffGraph.addEdge(blockNode, node, EdgeTypes.AST)
-      }
-  }
-
   override def runOnPart(part: String): Iterator[DiffGraph] = {
     createMethodNode()
     handleParameters()
     handleLocals()
     handleBody()
-    handleLiterals()
     Iterator(diffGraph.build())
   }
 }
