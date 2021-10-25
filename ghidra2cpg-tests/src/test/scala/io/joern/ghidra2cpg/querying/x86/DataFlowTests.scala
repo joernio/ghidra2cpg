@@ -20,7 +20,7 @@ class DataFlowTests extends GhidraBinToCpgSuite {
     new OssDataFlow(options).run(context)
   }
 
-  override def beforeAll: Unit = {
+  override def beforeAll(): Unit = {
     super.beforeAll()
     buildCpgForBin("x86_64.bin")
   }
