@@ -1,4 +1,4 @@
-package io.joern.ghidra2cpg.querying.x86
+package io.joern.ghidra2cpg.querying.mips
 
 import io.joern.ghidra2cpg.fixtures.GhidraBinToCpgSuite
 import io.shiftleft.codepropertygraph.Cpg
@@ -8,7 +8,6 @@ import io.shiftleft.dataflowengineoss.queryengine.EngineContext
 import io.shiftleft.dataflowengineoss.semanticsloader.{Parser, Semantics}
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
 import io.shiftleft.semanticcpg.layers.{LayerCreatorContext, Scpg}
-import io.shiftleft.utils.ProjectRoot
 
 class DataFlowTests extends GhidraBinToCpgSuite {
 
@@ -22,28 +21,25 @@ class DataFlowTests extends GhidraBinToCpgSuite {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    buildCpgForBin("x86_64.bin")
+    buildCpgForBin("t1_to_t9")
   }
 
   "The data flow should contain " in {
     implicit val resolver: ICallResolver = NoResolve
-    val semanticsFilename = ProjectRoot.relativise(
-      "ghidra2cpg-tests/src/resources/dataflowengineoss/src/test/resources/default.semantics"
-    )
-    val semantics: Semantics            = Semantics.fromList(new Parser().parseFile(semanticsFilename))
-    implicit var context: EngineContext = EngineContext(semantics)
+    val customSemantics =
+      """
+        |"<operator>.addition" 1->-1 2->-1
+        |"<operator>.assignment" 2->1
+        |"<operator>.incBy" 1->1 2->1 3->1 4->1
+        |""".stripMargin
+    val semantics: Semantics            = Semantics.fromList(new Parser().parse(customSemantics))
+    implicit val context: EngineContext = EngineContext(semantics)
 
-    def source = cpg.method.name("dataflow").call.argument.code("1")
-    def sink = cpg.method
-      .name("dataflow")
-      .call
-      .where(_.argument.order(2).code("ECX"))
-      .argument
-      .order(1)
-      .code("EAX")
+    def source = cpg.call.code("li t1,0x2a").argument(1)
+    def sink = cpg.call.code("or t9,t6,zero").take(1).argument(1)
     val flows = sink.reachableByFlows(source).l
 
     flows.map(flowToResultPairs).toSet shouldBe
-      Set(List("ADD EAX,0x1", "MOV EDX,EAX", "MOV ECX,EDX", "MOV EAX,ECX"))
+      Set(List("li t1,0x2a", "add t2,t0,t1", "addu t3,t2,t0", "addu t4,t3,t0", "addi t5,t4,0x1", "addiu t6,t5,0x1", "or t9,t6,zero"))
   }
 }
