@@ -27,7 +27,7 @@ class CallNodeTests extends GhidraBinToCpgSuite {
   }
 
   "A method with name 'main' should have a call with the according code" in {
-    cpg.method
+    val x = cpg.method
       .name("main")
       .call
       .name("<operator>.assignment")
@@ -37,24 +37,20 @@ class CallNodeTests extends GhidraBinToCpgSuite {
           .code("a")
       )
       .head
-      .code match {
-      case x =>
-        x shouldBe "MOV dword ptr [RBP + -0x4],0xa"
-      case _ => fail()
-    }
+      .code
+
+    x shouldBe "MOV dword ptr [RBP + -0x4],0xa"
   }
 
   "A call should have a method with the name 'main' " in {
-    cpg.call
+    val x = cpg.call
       .name("<operator>.assignment")
       .where(_.argument.order(2).code("a"))
       .method
       .l
-      .last match {
-      case x =>
-        x.name shouldBe "main"
-      case _ => fail()
-    }
+      .last
+
+    x.name shouldBe "main"
   }
   // TODO: should be level2->level1->main
   "The caller of the caller of 'level2' should be 'level1' " in {
@@ -65,23 +61,18 @@ class CallNodeTests extends GhidraBinToCpgSuite {
       .caller
       .l
       .head
-    x match {
-      case x =>
-        x.name shouldBe "level1"
-      case _ => fail()
-    }
+
+    x.name shouldBe "level1"
   }
 
   "The method 'level2' should have a node with the name 'level1' " in {
     implicit val resolver: ICallResolver = NoResolve
-    cpg.method
+    val x = cpg.method
       .name("level2")
       .caller
       .l
-      .head match {
-      case x =>
-        x.name shouldBe "level1"
-      case _ => fail()
-    }
+      .head
+
+    x.name shouldBe "level1"
   }
 }

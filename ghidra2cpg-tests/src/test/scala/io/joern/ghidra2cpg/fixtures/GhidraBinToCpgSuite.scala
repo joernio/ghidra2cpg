@@ -12,7 +12,6 @@ import io.shiftleft.dataflowengineoss.layers.dataflows.{OssDataFlow, OssDataFlow
 import io.shiftleft.dataflowengineoss.queryengine.EngineContext
 import io.shiftleft.dataflowengineoss.semanticsloader.{Parser, Semantics}
 import io.shiftleft.semanticcpg.language.{ICallResolver, _}
-import io.shiftleft.semanticcpg.layers.{LayerCreatorContext, Scpg}
 
 import java.nio.file.Files
 
